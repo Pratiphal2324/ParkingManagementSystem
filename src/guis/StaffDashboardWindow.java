@@ -51,8 +51,10 @@ public class StaffDashboardWindow {
         Button btnCheckOut = createMenuButton("Check Out Vehicle");
         Button btnHistoryUser = createMenuButton("History by UserID");
         Button btnHistoryPlate = createMenuButton("History by Plate");
+        Button btnSettings = createMenuButton("Settings");
         Button btnLogout = createMenuButton("Logout");
 
+        btnSettings.setOnAction(e->new Settings(contentArea,currentUser).showSettings());
         btnLogout.setOnAction(e->{
             LoginView loginView = new LoginView();
             Scene loginScene = loginView.createLoginScene();
@@ -60,7 +62,7 @@ public class StaffDashboardWindow {
             Stage currentStage = (Stage) btnLogout.getScene().getWindow();
             currentStage.setScene(loginScene);
         });
-        sidebar.getChildren().addAll(lblWelcome, new Separator(), btnCheckIn, btnCheckOut, btnHistoryUser, btnHistoryPlate, btnLogout);
+        sidebar.getChildren().addAll(lblWelcome, new Separator(), btnCheckIn, btnCheckOut, btnHistoryUser, btnHistoryPlate,btnSettings, btnLogout);
 
         contentArea = new VBox(20);
         contentArea.setPadding(new Insets(30));
@@ -267,7 +269,6 @@ public class StaffDashboardWindow {
         });
         contentArea.getChildren().addAll(title, searchBox, table);
     }
-
     private Button createMenuButton(String text) {
         Button b = new Button(text);
         b.setPrefWidth(180);
