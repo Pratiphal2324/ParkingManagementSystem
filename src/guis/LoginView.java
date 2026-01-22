@@ -126,7 +126,7 @@ public class LoginView {
                 if(((Staff) u).getJobTitle().equals("Manager")){
                     Stage stage = (Stage) loginBtn.getScene().getWindow();
                     stage.close();
-                    new CustomerDashboardWindow(u).show(stage);
+                    new ManagerDashboardWindow(u).show(stage);
                 }
                 else if(((Staff) u).getJobTitle().equals("Accountant")) {
                     Stage stage = (Stage) loginBtn.getScene().getWindow();

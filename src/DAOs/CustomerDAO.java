@@ -9,7 +9,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 public class CustomerDAO {
     public Customer getCustomerByUserId(int userid){
-        String sql = "select username,phone,password,role FROM customer INNER JOIN user ON customer.userID = user.userID where user.userID = ?";
+        String sql = "select username,phone,password,role FROM user WHERE userid = ?";
         try(Connection conn = DatabaseConnection.getConnection();
             PreparedStatement pstmt = conn.prepareStatement(sql)){
             pstmt.setInt(1,userid);
