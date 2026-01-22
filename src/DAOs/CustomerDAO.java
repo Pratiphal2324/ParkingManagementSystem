@@ -7,6 +7,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+
 public class CustomerDAO {
     public Customer getCustomerByUserId(int userid){
         String sql = "select username,phone,password,role FROM user WHERE userid = ?";
@@ -64,7 +67,6 @@ public class CustomerDAO {
     }
 
     public boolean updateUser(String s, String change, int userID){
-//        String sql = (s.equals("username"))?"UPDATE user SET username = ? WHERE userID = ?":"UPDATE user SET phone = ? WHERE userID = ?";
         String sql = "";
         if(s.equals("username")){
             sql = "UPDATE user SET username = ? WHERE userID = ?";
@@ -74,6 +76,9 @@ public class CustomerDAO {
         }
         else if(s.equals("password")){
             sql = "UPDATE user SET password = ? WHERE userID = ?";
+        }
+        else if(s.equals("jobTitle")){
+            sql = "UPDATE staff SET jobTitle = ? WHERE userID = ?";
         }
         try(Connection conn = DatabaseConnection.getConnection();
             PreparedStatement pstmt = conn.prepareStatement(sql)){
@@ -85,5 +90,26 @@ public class CustomerDAO {
             System.out.println(e.getMessage());
         }
         return false;
+    }
+    public List<Customer> getCustomerRecords(){
+        String sql = "SELECT * FROM user WHERE role = ?";
+        List<Customer> list = new ArrayList<>();
+        try(Connection conn = DatabaseConnection.getConnection();
+            PreparedStatement pstmt = conn.prepareStatement(sql)){
+            pstmt.setString(1,"Customer");
+            ResultSet rs = pstmt.executeQuery();
+            while(rs.next()){
+                int userID = rs.getInt("userID");
+                String username = rs.getString("username");
+                String phone = rs.getString("phone");
+                String password = rs.getString("password");
+                String role = rs.getString("role");
+                Customer c = new Customer(userID,username,phone,password, role);
+                list.add(c);
+            }
+        }catch(SQLException e){
+            System.out.println(e.getMessage());
+        }
+        return list;
     }
 }

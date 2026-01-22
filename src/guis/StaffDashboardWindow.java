@@ -243,6 +243,7 @@ public class StaffDashboardWindow {
         col7.setCellValueFactory(new PropertyValueFactory<>("ParkingRow"));
         col8.setCellValueFactory(new PropertyValueFactory<>("ParkingColumn"));
         col9.setCellValueFactory(new PropertyValueFactory<>("TotalFee"));
+        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
 
         searchBtn.setOnAction(e -> {
             try {
