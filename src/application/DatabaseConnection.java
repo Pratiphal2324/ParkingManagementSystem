@@ -13,7 +13,7 @@ public class DatabaseConnection {
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
             connection = DriverManager.getConnection(URL, USER, PASSWORD);
-            System.out.println("Connected to the Parking Database!");
+//            System.out.println("Connected to the Parking Database!");
         } catch (ClassNotFoundException e) {
             System.out.println("Driver not found: " + e.getMessage());
         } catch (SQLException e) {

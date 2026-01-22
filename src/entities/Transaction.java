@@ -16,6 +16,7 @@ public class Transaction {
         this.vehicle = vehicle;
         this.checkInTime = checkInTime;
         this.driverID = driverID;
+        this.totalFee = 0;
     }
     public void processCheckout() {
         this.checkOutTime = LocalDateTime.now();
@@ -27,8 +28,26 @@ public class Transaction {
             this.totalFee = exactHours * pricing.getHourlyRate();
         }
     }
+
+    public String getVehiclePlate() {
+        return vehicle.getNumberPlate();
+    }
+    public int getFloorNumber() {
+        return parkingSpace.getFloorNumber();
+    }
+    public int getParkingRow() {
+        return parkingSpace.getRowNumber();
+    }
+    public int getParkingColumn() {
+        return parkingSpace.getColumnNumber();
+    }
+
+    public ParkingSpace getParkingSpace() {
+        return parkingSpace;
+    }
+
     public LocalDateTime getCheckOutTime() {
-        return LocalDateTime.now();
+        return this.checkOutTime;
     }
     public int getTransactionID(){
         return transactionID;
@@ -46,6 +65,15 @@ public class Transaction {
     }
     public void setTransactionID(int transactionID) {
         this.transactionID = transactionID;
+    }
+
+    public void setCheckOutTime(LocalDateTime checkOutTime) {
+        this.checkOutTime = checkOutTime;
+    }
+
+
+    public void setTotalFee(double totalFee) {
+        this.totalFee = totalFee;
     }
 
     public String displayBill() {

@@ -7,10 +7,13 @@ import entities.Pricing;
 import entities.Transaction;
 import entities.User;
 import entities.Vehicle;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -21,6 +24,7 @@ import javafx.stage.Stage;
 import logic.AlertUser;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public class StaffDashboardWindow {
     private BorderPane root;
@@ -49,6 +53,13 @@ public class StaffDashboardWindow {
         Button btnHistoryPlate = createMenuButton("History by Plate");
         Button btnLogout = createMenuButton("Logout");
 
+        btnLogout.setOnAction(e->{
+            LoginView loginView = new LoginView();
+            Scene loginScene = loginView.createLoginScene();
+
+            Stage currentStage = (Stage) btnLogout.getScene().getWindow();
+            currentStage.setScene(loginScene);
+        });
         sidebar.getChildren().addAll(lblWelcome, new Separator(), btnCheckIn, btnCheckOut, btnHistoryUser, btnHistoryPlate, btnLogout);
 
         contentArea = new VBox(20);
@@ -202,15 +213,58 @@ public class StaffDashboardWindow {
         contentArea.getChildren().clear();
         Label title = new Label(titleText);
         title.setFont(Font.font("Arial", 22));
-
-        HBox searchBox = new HBox(10, new TextField(prompt), new Button("Search"));
+        TextField idField = new TextField();
+        idField.setPromptText(prompt);
+        Button searchBtn = new Button("Search");
+        HBox searchBox = new HBox(10, idField, searchBtn);
         searchBox.setAlignment(Pos.CENTER);
 
-        TableView<Object> table = new TableView<>();
-        TableColumn<Object, String> col1 = new TableColumn<>("Date");
-        TableColumn<Object, String> col2 = new TableColumn<>("Plate");
-        TableColumn<Object, String> col3 = new TableColumn<>("Amount");
-        table.getColumns().addAll(col1, col2, col3);
+        TableView<Transaction> table = new TableView<>();
+        TableColumn<Transaction, Integer> col1 = new TableColumn<>("TransactionID");
+        TableColumn<Transaction, Integer> col2 = new TableColumn<>("driverID");
+        TableColumn<Transaction, LocalDateTime> col3 = new TableColumn<>("CheckinTime");
+        TableColumn<Transaction, LocalDateTime> col4 = new TableColumn<>("CheckoutTime");
+        TableColumn<Transaction, String> col5 = new TableColumn<>("VehiclePlate");
+        TableColumn<Transaction, Integer> col6 = new TableColumn<>("Floor");
+        TableColumn<Transaction, Integer> col7 = new TableColumn<>("Row");
+        TableColumn<Transaction, Integer> col8 = new TableColumn<>("Column");
+        TableColumn<Transaction, Double> col9 = new TableColumn<>("TotalFee");
+
+        table.getColumns().addAll(col1, col2, col3, col4, col5, col6, col7, col8, col9);
+
+        col1.setCellValueFactory(new PropertyValueFactory<>("TransactionID"));
+        col2.setCellValueFactory(new PropertyValueFactory<>("driverID"));
+        col3.setCellValueFactory(new PropertyValueFactory<>("checkInTime"));
+        col4.setCellValueFactory(new PropertyValueFactory<>("checkOutTime"));
+        col5.setCellValueFactory(new PropertyValueFactory<>("VehiclePlate"));
+        col6.setCellValueFactory(new PropertyValueFactory<>("FloorNumber"));
+        col7.setCellValueFactory(new PropertyValueFactory<>("ParkingRow"));
+        col8.setCellValueFactory(new PropertyValueFactory<>("ParkingColumn"));
+        col9.setCellValueFactory(new PropertyValueFactory<>("TotalFee"));
+
+        searchBtn.setOnAction(e -> {
+            try {
+                String input = idField.getText();
+                if(titleText.equals("Search by User ID")) {
+                    int userId = Integer.parseInt(input);
+                    ObservableList<Transaction> data = FXCollections.observableArrayList();
+                    List<Transaction> list = new TransactionDAO().getHistoryByUserId(userId);
+                    data.addAll(list);
+                    table.setItems(data);
+                }else if(titleText.equals("Search by Plate")){
+                    ObservableList<Transaction> data = FXCollections.observableArrayList();
+                    List<Transaction> list = new TransactionDAO().getHistoryByVehiclePlate(input);
+                    data.addAll(list);
+                    table.setItems(data);
+                }
+            }catch(NumberFormatException f){
+                new AlertUser().showAlert(Alert.AlertType.ERROR, "Error!", f.getMessage());
+            }
+            catch (Exception ex) {
+                ex.printStackTrace();
+                new AlertUser().showAlert(Alert.AlertType.ERROR, "Search Error", "Invalid User ID or Database Error");
+            }
+        });
         contentArea.getChildren().addAll(title, searchBox, table);
     }
 

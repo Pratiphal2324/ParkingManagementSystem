@@ -62,4 +62,28 @@ public class CustomerDAO {
         }
         return 0;
     }
+
+    public boolean updateUser(String s, String change, int userID){
+//        String sql = (s.equals("username"))?"UPDATE user SET username = ? WHERE userID = ?":"UPDATE user SET phone = ? WHERE userID = ?";
+        String sql = "";
+        if(s.equals("username")){
+            sql = "UPDATE user SET username = ? WHERE userID = ?";
+        }
+        else if(s.equals("phone")){
+            sql = "UPDATE user SET phone = ? WHERE userID = ?";
+        }
+        else if(s.equals("password")){
+            sql = "UPDATE user SET password = ? WHERE userID = ?";
+        }
+        try(Connection conn = DatabaseConnection.getConnection();
+            PreparedStatement pstmt = conn.prepareStatement(sql)){
+            pstmt.setString(1,change);
+            pstmt.setInt(2,userID);
+            int rows = pstmt.executeUpdate();
+            return rows > 0;
+        }catch(SQLException e){
+            System.out.println(e.getMessage());
+        }
+        return false;
+    }
 }

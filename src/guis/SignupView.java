@@ -42,7 +42,6 @@ public class SignupView {
         signinLink.setOnMouseClicked(e->{
             LoginView loginView = new LoginView();
             Scene loginScene = loginView.createLoginScene();
-
             Stage currentStage = (Stage) signinLink.getScene().getWindow();
             currentStage.setScene(loginScene);});
 
@@ -112,6 +111,7 @@ public class SignupView {
                 User u = new SignUp().registerUser(uname, ph, pass, "Staff", Long.parseLong(s), startTime, hd, job);
                 if (job.equals("Accountant")) {
                     Stage stage = (Stage) registerBtn.getScene().getWindow();
+                    stage.close();
                     new StaffDashboardWindow(u).show(stage);
                 } else if (job.equals("Manager")) {
                     new ManagerDashboardWindow(u);

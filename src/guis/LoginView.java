@@ -124,10 +124,13 @@ public class LoginView {
             }
             else if(u instanceof Staff){
                 if(((Staff) u).getJobTitle().equals("Manager")){
-                    new ManagerDashboardWindow(u);
+                    Stage stage = (Stage) loginBtn.getScene().getWindow();
+                    stage.close();
+                    new CustomerDashboardWindow(u).show(stage);
                 }
                 else if(((Staff) u).getJobTitle().equals("Accountant")) {
                     Stage stage = (Stage) loginBtn.getScene().getWindow();
+                    stage.close();
                     new StaffDashboardWindow(u).show(stage);
                 }
                 else{
@@ -170,7 +173,9 @@ public class LoginView {
             plateBtn.setStyle("-fx-background-color: #34495e; -fx-text-fill: white;");
 
             plateBtn.setOnAction(e -> {
-                c.showDashboard(c,new VehicleDAO().getVehicleByNumberPlate(plate));
+                Stage stage = (Stage) plateBtn.getScene().getWindow();
+                stage.close();
+                new CustomerDashboardWindow(c).show(stage);
             });
             vehicleList.getChildren().add(plateBtn);
         }
@@ -235,7 +240,9 @@ public class LoginView {
                         new AlertUser().showAlert(Alert.AlertType.ERROR, "Registration Error", "Vehicle Registration not successful! Please Try Again");
                     }
                     else{
-                        u.showDashboard(u,v);
+                        Stage stage = (Stage) plateField.getScene().getWindow();
+                        stage.close();
+                        new StaffDashboardWindow(u).show(stage);
                     }
                 }
             }
