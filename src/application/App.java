@@ -11,8 +11,4 @@ public class App extends Application {
         primaryStage.setScene(loginView.createLoginScene());
         primaryStage.show();
     }
-
-    public static void main(String[] args) {
-        launch(args);
-    }
 }

@@ -39,7 +39,7 @@ public class SignupView {
 
         Hyperlink signinLink = new Hyperlink("Already have an account? Sign In");
         signinLink.setStyle("-fx-text-fill: #2980b9; -fx-underline: false; -fx-font-weight: bold;");
-        signinLink.setOnMouseClicked(e->{
+        signinLink.setOnMouseClicked(_ ->{
             LoginView loginView = new LoginView();
             Scene loginScene = loginView.createLoginScene();
             Stage currentStage = (Stage) signinLink.getScene().getWindow();
@@ -65,7 +65,7 @@ public class SignupView {
         username = createStyledField("Username");
         pass = createStyledPassword("Password");
         phone = createStyledField("Phone Number");
-        registerBtn.setOnMouseClicked(e->handleCustomerSignUp(username.getText(),pass.getText(),phone.getText()));
+        registerBtn.setOnMouseClicked(_ ->handleCustomerSignUp(username.getText(),pass.getText(),phone.getText()));
         dynamicFieldsContainer.getChildren().addAll(username, pass, phone);
     }
     TextField staffUsername;
@@ -93,7 +93,7 @@ public class SignupView {
         staffShift.setPromptText("Select Shift Time");
         staffShift.setPrefSize(300, 40);
         staffShift.setStyle("-fx-background-radius: 8;");
-        registerBtn.setOnMouseClicked(e->handleStaffSignUp(staffUsername.getText(),staffPass.getText(),staffPhone.getText(),staffJobTitle.getText(),staffSalary.getText(),staffHireDate.getValue(),staffShift.getValue()));
+        registerBtn.setOnMouseClicked(_ ->handleStaffSignUp(staffUsername.getText(),staffPass.getText(),staffPhone.getText(),staffJobTitle.getText(),staffSalary.getText(),staffHireDate.getValue(),staffShift.getValue()));
         dynamicFieldsContainer.getChildren().addAll(staffUsername, staffPass, staffJobTitle, staffSalary, staffHireDate,staffPhone, staffShift);
     }
     public void handleStaffSignUp(String uname, String pass, String ph, String job, String s, LocalDate hd, String shift){

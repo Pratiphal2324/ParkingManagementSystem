@@ -15,9 +15,9 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 
 public class SignIn {
-    private void showAlert(Alert.AlertType type, String title, String message) {
-        Alert alert = new Alert(type);
-        alert.setTitle(title);
+    private void showAlert(String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Login Failed");
         alert.setHeaderText(null);
         alert.setContentText(message);
 
@@ -28,7 +28,7 @@ public class SignIn {
     }
     public User validateLogin(String username, String password){
         if(username.isEmpty() || password.isEmpty()){
-            showAlert(Alert.AlertType.ERROR, "Login Failed", "Invalid username or password.");
+            showAlert("Invalid username or password.");
             return null;
         }
         String sql = "select userID, role,phone, count(userID) as count from user where username = ? AND password = ?";
@@ -43,7 +43,7 @@ public class SignIn {
                 String phone = rs.getString("phone");
                 int count = rs.getInt("count");
                 if(count != 1){
-                    showAlert(Alert.AlertType.ERROR, "Login Failed", "You are not registered. Please sign up first!");
+                    showAlert("You are not registered. Please sign up first!");
                     return null;
                 }
                 if(role.equals("Customer")){

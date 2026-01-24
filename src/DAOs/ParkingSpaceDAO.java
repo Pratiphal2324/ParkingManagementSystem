@@ -12,7 +12,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 public class ParkingSpaceDAO {
     public ParkingSpace getParkingSpaceByRowColFloor(int row, int column, int floorNumber){
-        String sql = "SELECT * FROM parkingspace WHERE RowNumber = ? AND ColumnNumber = ? AND FloorNumber = ?";
+        String sql = "SELECT * FROM view_parkingspace WHERE RowNumber = ? AND ColumnNumber = ? AND FloorNumber = ?";
         try(Connection conn = DatabaseConnection.getConnection();
             PreparedStatement pstmt = conn.prepareStatement(sql)){
             pstmt.setInt(1,row);
@@ -35,7 +35,7 @@ public class ParkingSpaceDAO {
         if(!b){
             return null;
         }
-        String sql = "SELECT * FROM parkingspace WHERE Type = ? AND Category = ? AND isOccupied = 0 ORDER BY FloorNumber ASC, RowNumber ASC, ColumnNumber ASC LIMIT 1";
+        String sql = "SELECT * FROM view_parkingspace WHERE Type = ? AND Category = ? AND isOccupied = 0 ORDER BY FloorNumber ASC, RowNumber ASC, ColumnNumber ASC LIMIT 1";
         try(Connection conn = DatabaseConnection.getConnection();
             PreparedStatement pstmt = conn.prepareStatement(sql)){
             pstmt.setString(1,v.getType());
@@ -85,5 +85,38 @@ public class ParkingSpaceDAO {
         }catch(SQLException e){
             System.out.println(e.getMessage());
         }
+    }
+    public int getOccupancy(){
+        String sql = "SELECT COUNT(*) as count FROM view_parkingspace WHERE isOccupied = 1;";
+        int n=0;
+        try(Connection conn = DatabaseConnection.getConnection();
+            PreparedStatement pstmt = conn.prepareStatement(sql)){
+            ResultSet rs = pstmt.executeQuery();
+            if(rs.next()) {
+                n = rs.getInt("count");
+            }
+            else{
+                new AlertUser().showAlert(Alert.AlertType.ERROR, "ERROR", "Failed to fetch occupancy!");
+            }
+        }catch(SQLException e){
+            System.out.println(e.getMessage());
+        }
+        return n;
+    }
+    public boolean updateSpace(int floorNumber, int rowNumber, int colNumber, String newCategory, String newType){
+        String sql = "UPDATE parkingspace SET Type = ?, Category = ? WHERE FloorNumber = ? AND RowNumber = ? AND ColumnNumber = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1,newType);
+            pstmt.setString(2,newCategory);
+            pstmt.setInt(3,floorNumber);
+            pstmt.setInt(4,rowNumber);
+            pstmt.setInt(5,colNumber);
+            int rows = pstmt.executeUpdate();
+            return rows > 0;
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+        return false;
     }
 }

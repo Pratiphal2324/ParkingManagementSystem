@@ -50,10 +50,10 @@ public class CustomerDashboardWindow {
         Button btnLogout = createNavButton("Logout");
 
         // Action Handlers
-        btnOverview.setOnAction(e -> showOverview());
-        btnHistory.setOnAction(e -> showMyHistory());
-        btnSettings.setOnAction(e -> new Settings(contentArea, currentUser).showSettings());
-        btnLogout.setOnAction(e -> {
+        btnOverview.setOnAction(_ -> showOverview());
+        btnHistory.setOnAction(_ -> showMyHistory());
+        btnSettings.setOnAction(_ -> new Settings(contentArea, currentUser).showSettings());
+        btnLogout.setOnAction(_ -> {
             LoginView loginView = new LoginView();
             Scene loginScene = loginView.createLoginScene();
 
@@ -154,7 +154,6 @@ public class CustomerDashboardWindow {
             data.addAll(list);
             table.setItems(data);
         } catch (Exception ex) {
-            ex.printStackTrace();
             new AlertUser().showAlert(Alert.AlertType.ERROR, "Database Error", "Unable to load history.");
         }
 

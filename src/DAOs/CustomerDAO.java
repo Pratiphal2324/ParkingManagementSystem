@@ -12,7 +12,7 @@ import java.util.List;
 
 public class CustomerDAO {
     public Customer getCustomerByUserId(int userid){
-        String sql = "select username,phone,password,role FROM user WHERE userid = ?";
+        String sql = "select username,phone,password,role FROM view_user WHERE userid = ?";
         try(Connection conn = DatabaseConnection.getConnection();
             PreparedStatement pstmt = conn.prepareStatement(sql)){
             pstmt.setInt(1,userid);
@@ -33,7 +33,7 @@ public class CustomerDAO {
         if(getCustomerCountWithUsername(uname)>1){
             return null;
         }
-        String sql = "select * FROM user where username = ? AND password = ?";
+        String sql = "select * FROM view_user where username = ? AND password = ?";
         try(Connection conn = DatabaseConnection.getConnection();
             PreparedStatement pstmt = conn.prepareStatement(sql)){
             pstmt.setString(1,uname);
@@ -50,7 +50,7 @@ public class CustomerDAO {
         return null;
     }
     public int getCustomerCountWithUsername(String uname){
-        String sql = "select COUNT(*) as count FROM user where username = ?";
+        String sql = "select COUNT(*) as count FROM view_user where username = ?";
         try(Connection conn = DatabaseConnection.getConnection();
             PreparedStatement pstmt = conn.prepareStatement(sql)){
             pstmt.setString(1,uname);
@@ -65,34 +65,8 @@ public class CustomerDAO {
         }
         return 0;
     }
-
-    public boolean updateUser(String s, String change, int userID){
-        String sql = "";
-        if(s.equals("username")){
-            sql = "UPDATE user SET username = ? WHERE userID = ?";
-        }
-        else if(s.equals("phone")){
-            sql = "UPDATE user SET phone = ? WHERE userID = ?";
-        }
-        else if(s.equals("password")){
-            sql = "UPDATE user SET password = ? WHERE userID = ?";
-        }
-        else if(s.equals("jobTitle")){
-            sql = "UPDATE staff SET jobTitle = ? WHERE userID = ?";
-        }
-        try(Connection conn = DatabaseConnection.getConnection();
-            PreparedStatement pstmt = conn.prepareStatement(sql)){
-            pstmt.setString(1,change);
-            pstmt.setInt(2,userID);
-            int rows = pstmt.executeUpdate();
-            return rows > 0;
-        }catch(SQLException e){
-            System.out.println(e.getMessage());
-        }
-        return false;
-    }
     public List<Customer> getCustomerRecords(){
-        String sql = "SELECT * FROM user WHERE role = ?";
+        String sql = "SELECT * FROM view_user WHERE role = ?";
         List<Customer> list = new ArrayList<>();
         try(Connection conn = DatabaseConnection.getConnection();
             PreparedStatement pstmt = conn.prepareStatement(sql)){

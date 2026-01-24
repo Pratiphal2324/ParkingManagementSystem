@@ -1,10 +1,7 @@
 package guis;
 
-import DAOs.CustomerDAO;
-import DAOs.StaffDAO;
-import entities.Customer;
-import entities.Staff;
-import entities.User;
+import DAOs.*;
+import entities.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
@@ -28,12 +25,14 @@ import java.util.Optional;
 public class ManagerDashboardWindow {
     private BorderPane root;
     private VBox contentArea;
-    private User currentUser;
+    private final User currentUser;
 
     public ManagerDashboardWindow(User user) {
         this.currentUser = user;
     }
+
     Button btnStaffRecords;
+
     public void show(Stage stage) {
         root = new BorderPane();
 
@@ -43,7 +42,7 @@ public class ManagerDashboardWindow {
         sidebar.setStyle("-fx-background-color: #2c3e50;");
         sidebar.setPrefWidth(220);
 
-        Label lblWelcome = new Label("Manager Portall\n" + currentUser.getUsername());
+        Label lblWelcome = new Label("Welcome Manager, \n" + currentUser.getUsername());
         lblWelcome.setTextFill(Color.WHITE);
         lblWelcome.setFont(Font.font("Verdana", FontWeight.BOLD, 16));
 
@@ -52,47 +51,68 @@ public class ManagerDashboardWindow {
         lblStaff.setTextFill(Color.web("#95a5a6"));
         lblStaff.setFont(Font.font("Arial", FontWeight.BOLD, 10));
 
+        Button home = createMenuButton("Home");
+        home.setOnAction(_ -> showWelcomeSummary());
+
         Button btnHire = createMenuButton("Hire Staff");
-        btnHire.setOnAction(e->showHireStaff());
+        btnHire.setOnAction(_ -> showHireStaff());
 
         Button btnFire = createMenuButton("Fire Staff");
-        btnFire.setOnAction(e-> showFireStaff());
+        btnFire.setOnAction(_ -> showFireStaff());
 
         btnStaffRecords = createMenuButton("Staff Records");
-        btnStaffRecords.setOnAction(e-> {
-            TableView <Staff> s = showStaffRecords();
+        btnStaffRecords.setOnAction(_ -> {
+            TableView<Staff> s = showStaffRecords();
             fillTable(s);
         });
 
         Button btnUpdateStaffRecord = createMenuButton("Update Staff Record");
-        btnUpdateStaffRecord.setOnAction(e->showUpdateStaff());
+        btnUpdateStaffRecord.setOnAction(_ -> showUpdateStaff());
 
         Button btnCustomerRecords = createMenuButton("Customer Records");
-        btnCustomerRecords.setOnAction(e->{
-            TableView <Customer> c = showCustomerRecords();
+        btnCustomerRecords.setOnAction(_ -> {
+            TableView<Customer> c = showCustomerRecords();
             fillTableCustomer(c);
         });
 
         // Group 2: System Management
+        Label lblHome = new Label("WELCOME SCREEN");
+        lblHome.setTextFill(Color.web("#95a5a6"));
+        lblHome.setFont(Font.font("Arial", FontWeight.BOLD, 10));
+
         Label lblSystem = new Label("SYSTEM CONFIG");
         lblSystem.setTextFill(Color.web("#95a5a6"));
         lblSystem.setFont(Font.font("Arial", FontWeight.BOLD, 10));
 
         Button btnPricing = createMenuButton("Update Pricing");
+        btnPricing.setOnAction(_ -> showUpdatePricing());
+
         Button btnFloor = createMenuButton("Update Floor");
+        btnFloor.setOnAction(_ ->showUpdateFloor());
+
         Button btnSpace = createMenuButton("Update Parking Space");
+        btnSpace.setOnAction(_ ->showUpdateSpace());
+
+        Label lblPersonalConfig = new Label("PERSONAL CONFIG");
+        lblPersonalConfig.setTextFill(Color.web("#95a5a6"));
+        lblPersonalConfig.setFont(Font.font("Arial", FontWeight.BOLD, 10));
 
         // Group 3: Account
         Separator sep = new Separator();
         Button btnSettings = createMenuButton("Settings");
         Button btnLogout = createMenuButton("Logout");
 
+        Label lblExit = new Label("EXIT");
+        lblExit.setTextFill(Color.web("#95a5a6"));
+        lblExit.setFont(Font.font("Arial", FontWeight.BOLD, 10));
+
         sidebar.getChildren().addAll(
                 lblWelcome, new Separator(),
+                lblHome, home, new Separator(),
                 lblStaff, btnHire, btnFire, btnStaffRecords, btnUpdateStaffRecord, btnCustomerRecords,
                 new Separator(),
                 lblSystem, btnPricing, btnFloor, btnSpace,
-                sep, btnSettings, btnLogout
+                sep,lblPersonalConfig, btnSettings,new Separator(),lblExit, btnLogout
         );
 
         // --- CONTENT AREA ---
@@ -101,9 +121,9 @@ public class ManagerDashboardWindow {
         contentArea.setAlignment(Pos.TOP_CENTER);
         contentArea.setStyle("-fx-background-color: #ecf0f1;");
 
-        btnSettings.setOnAction(e -> new Settings(contentArea, currentUser).showSettings());
+        btnSettings.setOnAction(_ -> new Settings(contentArea, currentUser).showSettings());
 
-        btnLogout.setOnAction(e -> {
+        btnLogout.setOnAction(_ -> {
             LoginView loginView = new LoginView();
             Scene loginScene = loginView.createLoginScene();
             Stage currentStage = (Stage) btnLogout.getScene().getWindow();
@@ -134,13 +154,17 @@ public class ManagerDashboardWindow {
         Label title = new Label("Administrative Overview");
         title.setFont(Font.font("Arial", FontWeight.BOLD, 26));
 
-        // Example "Stats Card" Row
+        double totalRevenue = new TransactionDAO().getTotalRevenue();
+        int activeStaff = new StaffDAO().getTotalNoOfStaff();
+        int occupancy = new ParkingSpaceDAO().getOccupancy();
+        int totalParkingSpaces = new FloorDAO().getTotalSpaces();
+
         HBox statsRow = new HBox(20);
         statsRow.setAlignment(Pos.CENTER);
         statsRow.getChildren().addAll(
-                createStatCard("Total Revenue", "$12,450", "#27ae60"),
-                createStatCard("Active Staff", "8", "#2980b9"),
-                createStatCard("Occupancy", "74%", "#e67e22")
+                createStatCard("Total Revenue", "$" + totalRevenue, "#27ae60"),
+                createStatCard("Active Staff", String.valueOf(activeStaff), "#2980b9"),
+                createStatCard("Occupancy", occupancy + "/" + totalParkingSpaces, "#e67e22")
         );
 
         contentArea.getChildren().addAll(title, new Separator(), statsRow);
@@ -161,6 +185,7 @@ public class ManagerDashboardWindow {
         card.getChildren().addAll(lblT, lblV);
         return card;
     }
+
     private TextField createStyledField(String prompt) {
         TextField f = new TextField();
         f.setPromptText(prompt);
@@ -176,8 +201,10 @@ public class ManagerDashboardWindow {
         p.setStyle("-fx-background-radius: 8;");
         return p;
     }
+
     Button registerBtn;
-    private void showHireStaff(){
+
+    private void showHireStaff() {
         contentArea.getChildren().clear();
         Label title = new Label("Hire New Staff");
         title.setFont(Font.font("Verdana", FontWeight.BOLD, 18));
@@ -197,10 +224,11 @@ public class ManagerDashboardWindow {
         staffShift.setPrefSize(300, 40);
         staffShift.setStyle("-fx-background-radius: 8;");
         registerBtn = new Button("Hire");
-        registerBtn.setOnMouseClicked(e->handleStaffSignUp(staffUsername.getText(),staffPass.getText(),staffPhone.getText(),staffJobTitle.getText(),staffSalary.getText(),staffHireDate.getValue(),staffShift.getValue()));
-        contentArea.getChildren().addAll(title, staffUsername, staffPass, staffJobTitle, staffSalary, staffHireDate,staffPhone, staffShift, registerBtn);
+        registerBtn.setOnMouseClicked(_ -> handleStaffSignUp(staffUsername.getText(), staffPass.getText(), staffPhone.getText(), staffJobTitle.getText(), staffSalary.getText(), staffHireDate.getValue(), staffShift.getValue()));
+        contentArea.getChildren().addAll(title, staffUsername, staffPass, staffJobTitle, staffSalary, staffHireDate, staffPhone, staffShift, registerBtn);
     }
-    private void showFireStaff(){
+
+    private void showFireStaff() {
         contentArea.getChildren().clear();
         Label title = new Label("Fire Staff");
         title.setFont(Font.font("Arial", FontWeight.BOLD, 22));
@@ -214,13 +242,13 @@ public class ManagerDashboardWindow {
         btnConfirm.setStyle("-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-weight: bold;");
         btnConfirm.setPrefSize(200, 40);
 
-        btnConfirm.setOnAction(e-> {
+        btnConfirm.setOnAction(_ -> {
             Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
             alert.setTitle("Confirmation Dialog");
             alert.setHeaderText("Are You Sure?");
             alert.setContentText("Are you sure you want to fire a staff member?");
             Optional<ButtonType> result = alert.showAndWait();
-            if(result.isPresent() && result.get() == ButtonType.OK){
+            if (result.isPresent() && result.get() == ButtonType.OK) {
                 handleStaffFiring(staff.getText());
             }
         });
@@ -228,7 +256,8 @@ public class ManagerDashboardWindow {
         contentArea.getChildren().addAll(title, staff, btnConfirm);
 
     }
-    private TableView<Staff> showStaffRecords(){
+
+    private TableView<Staff> showStaffRecords() {
         TableView<Staff> table = new TableView<>();
         table.setMinHeight(400);
         table.setPrefHeight(600);
@@ -253,7 +282,8 @@ public class ManagerDashboardWindow {
         col7.setCellValueFactory(new PropertyValueFactory<>("JobTitle"));
         return table;
     }
-    private TableView<Customer> showCustomerRecords(){
+
+    private TableView<Customer> showCustomerRecords() {
         TableView<Customer> table = new TableView<>();
         table.setMinHeight(400);
         table.setPrefHeight(600);
@@ -270,6 +300,7 @@ public class ManagerDashboardWindow {
         col3.setCellValueFactory(new PropertyValueFactory<>("Phone"));
         return table;
     }
+
     private void fillTableCustomer(TableView<Customer> table) {
         contentArea.getChildren().clear();
         contentArea.setSpacing(15);
@@ -285,11 +316,11 @@ public class ManagerDashboardWindow {
         } catch (NumberFormatException f) {
             new AlertUser().showAlert(Alert.AlertType.ERROR, "Error!", f.getMessage());
         } catch (Exception ex) {
-            ex.printStackTrace();
             new AlertUser().showAlert(Alert.AlertType.ERROR, "Search Error", "Invalid User ID or Database Error");
         }
         contentArea.getChildren().addAll(title, new Separator(), table);
     }
+
     private void fillTable(TableView<Staff> table) {
         contentArea.getChildren().clear();
         contentArea.setSpacing(15);
@@ -305,12 +336,14 @@ public class ManagerDashboardWindow {
         } catch (NumberFormatException f) {
             new AlertUser().showAlert(Alert.AlertType.ERROR, "Error!", f.getMessage());
         } catch (Exception ex) {
-            ex.printStackTrace();
             new AlertUser().showAlert(Alert.AlertType.ERROR, "Search Error", "Invalid User ID or Database Error");
         }
         contentArea.getChildren().addAll(title, new Separator(), table);
     }
+
     Staff u;
+    ParkingSpace parkSpace;
+
     private void showUpdateStaff() {
         contentArea.getChildren().clear();
         Label title = new Label("Update Staff Records");
@@ -325,7 +358,7 @@ public class ManagerDashboardWindow {
         btnView.setStyle("-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-weight: bold;");
         btnView.setPrefSize(200, 40);
 
-        btnView.setOnAction(e -> {
+        btnView.setOnAction(_ -> {
             String inputId = idSearchField.getText();
             if (inputId.isEmpty()) {
                 new AlertUser().showAlert(Alert.AlertType.WARNING, "Input Error", "Please enter a User ID.");
@@ -369,14 +402,137 @@ public class ManagerDashboardWindow {
             );
 
             Button btnBack = new Button("Back to Search");
-            btnBack.setOnAction(ev -> showUpdateStaff());
+            btnBack.setOnAction(_ -> showUpdateStaff());
 
             contentArea.getChildren().addAll(t, profileCard, btnBack);
         });
 
         contentArea.getChildren().addAll(title, idSearchField, btnView);
     }
+
+    private void showUpdatePricing() {
+        contentArea.getChildren().clear();
+        contentArea.setSpacing(20);
+
+        Label title = new Label("System Pricing Management");
+        title.setFont(Font.font("Verdana", FontWeight.BOLD, 22));
+        title.setTextFill(Color.web("#2c3e50"));
+
+        // Container for the table (The Card)
+        VBox tableCard = new VBox(15);
+        tableCard.setPadding(new Insets(20));
+        tableCard.setStyle("-fx-background-color: white; -fx-background-radius: 10; " +
+                "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 5);");
+
+        TableView<Pricing> pricingTable = createPricingTable();
+
+        // Fetch all 4 records from DB
+        ObservableList<Pricing> data = FXCollections.observableArrayList(
+                new PricingDAO().getPricingByTypeCategory("Fuel", "TwoWheeler"),
+                new PricingDAO().getPricingByTypeCategory("Electric", "TwoWheeler"),
+                new PricingDAO().getPricingByTypeCategory("Fuel", "FourWheeler"),
+                new PricingDAO().getPricingByTypeCategory("Electric", "FourWheeler")
+        );
+
+        pricingTable.setItems(data);
+        tableCard.getChildren().add(pricingTable);
+
+        contentArea.getChildren().addAll(title, new Separator(), tableCard);
+    }
+
+    private void handlePriceEdit(Pricing p) {
+        // 1. Create the custom dialog
+        Dialog<ButtonType> dialog = new Dialog<>();
+        dialog.setTitle("Update Pricing");
+        dialog.setHeaderText("Updating Rates for: " + p.getVehicleType() + " (" + p.getVehicleCategory() + ")");
+
+        // 2. Set the button types (Confirmation and Cancel)
+        ButtonType updateButtonType = new ButtonType("Update", ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(updateButtonType, ButtonType.CANCEL);
+
+        // 3. Create the layout and fields
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.setPadding(new Insets(20, 150, 10, 10));
+
+        TextField hourlyRateField = new TextField(String.valueOf(p.getHourlyRate()));
+        hourlyRateField.setPromptText("Hourly Rate");
+
+        TextField minPriceField = new TextField(String.valueOf(p.getMinPrice()));
+        minPriceField.setPromptText("Minimum Price");
+
+        grid.add(new Label("New Hourly Rate:"), 0, 0);
+        grid.add(hourlyRateField, 1, 0);
+        grid.add(new Label("New Min Price:"), 0, 1);
+        grid.add(minPriceField, 1, 1);
+
+        dialog.getDialogPane().setContent(grid);
+
+        // 4. Handle the result
+        dialog.showAndWait().ifPresent(response -> {
+            if (response == updateButtonType) {
+                try {
+                    double newHourly = Double.parseDouble(hourlyRateField.getText());
+                    double newMin = Double.parseDouble(minPriceField.getText());
+
+                    // Call your DAO to update both values
+                    boolean success = new PricingDAO().updatePricing(p.getVehicleCategory(), p.getVehicleType(),newHourly,newMin);
+
+                    if (success) {
+                        new AlertUser().showAlert(Alert.AlertType.INFORMATION, "Success", "Pricing updated successfully!");
+                        showUpdatePricing(); // Refresh the table to show new values
+                    }
+                } catch (NumberFormatException e) {
+                    new AlertUser().showAlert(Alert.AlertType.ERROR, "Input Error", "Please enter valid numeric values.");
+                }
+            }
+        });
+    }
+
+    private TableView<Pricing> createPricingTable() {
+        TableView<Pricing> table = new TableView<>();
+        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
+        table.setPrefHeight(250);
+
+        TableColumn<Pricing, String> colCategory = new TableColumn<>("Category");
+        colCategory.setCellValueFactory(new PropertyValueFactory<>("vehicleCategory"));
+
+        TableColumn<Pricing, String> colType = new TableColumn<>("Type");
+        colType.setCellValueFactory(new PropertyValueFactory<>("vehicleType"));
+
+        TableColumn<Pricing, Double> colHourly = new TableColumn<>("Hourly Rate ($)");
+        colHourly.setCellValueFactory(new PropertyValueFactory<>("hourlyRate"));
+
+        TableColumn<Pricing, Double> colMin = new TableColumn<>("Min Price ($)");
+        colMin.setCellValueFactory(new PropertyValueFactory<>("minPrice"));
+
+        // Add an Action Column for the Edit Button
+        TableColumn<Pricing, Void> colAction = new TableColumn<>("Action");
+        colAction.setCellFactory(_ -> new TableCell<>() {
+            private final Button btn = new Button("Edit");
+
+            {
+                btn.setStyle("-fx-background-color: #3498db; -fx-text-fill: white; -fx-cursor: hand;");
+                btn.setOnAction(_ -> {
+                    Pricing p = getTableView().getItems().get(getIndex());
+                    handlePriceEdit(p);
+                });
+            }
+
+            @Override
+            protected void updateItem(Void item, boolean empty) {
+                super.updateItem(item, empty);
+                setGraphic(empty ? null : btn);
+            }
+        });
+
+        table.getColumns().addAll(colCategory, colType, colHourly, colMin, colAction);
+        return table;
+    }
+
     private HBox createRecordRow(String label, String value, String type) {
+        Label lblValue;
         HBox row = new HBox(10);
         row.setAlignment(Pos.CENTER_LEFT);
 
@@ -385,7 +541,7 @@ public class ManagerDashboardWindow {
         lblTitle.setFont(Font.font("Verdana", FontWeight.BOLD, 12));
         lblTitle.setTextFill(Color.GRAY);
 
-        Label lblValue = new Label(value);
+        lblValue = new Label(value);
         lblValue.setFont(Font.font("Verdana", 15));
 
         textContainer.getChildren().addAll(lblTitle, lblValue);
@@ -396,20 +552,25 @@ public class ManagerDashboardWindow {
         Button btnEdit = new Button("Edit");
         btnEdit.setStyle("-fx-background-color: #3498db; -fx-text-fill: white; -fx-background-radius: 5; -fx-cursor: hand;");
 
-        btnEdit.setOnAction(e -> {
-            if(type.equals("shiftTime")){
-                handleUpdateShiftTime(lblValue);
-            }
-            else if(type.equals("salary")){
-                handleUpdateSalary(lblValue);
-            }else {
-                handleUpdate(type, lblValue);
+        btnEdit.setOnAction(_ -> {
+            switch (type) {
+                case "shiftTime" -> handleUpdateShiftTime(lblValue);
+                case "salary" -> handleUpdateSalary(lblValue);
+                case "username", "phone", "jobTitle" -> handleUpdate(type, lblValue);
+                case "category", "type" -> {
+                    if (parkSpace.isOccupied()) {
+                        new AlertUser().showAlert(Alert.AlertType.ERROR, "ERROR", "Cannot update parking space which is still occupied!");
+                        return;
+                    }
+                    handleUpdateSpace(type, lblValue);
+                }
             }
         });
 
         row.getChildren().addAll(textContainer, spacer, btnEdit);
         return row;
     }
+
     private void handleUpdateShiftTime(Label displayLabel) {
         TextInputDialog dialog = new TextInputDialog(displayLabel.getText());
         dialog.setTitle("Update Shift Time");
@@ -421,14 +582,14 @@ public class ManagerDashboardWindow {
                 try {
                     LocalTime newTime = java.time.LocalTime.parse(newValue.trim());
 
-                    boolean success = new StaffDAO().updateShiftTime(newTime, currentUser.getUserID());
+                    boolean success = new StaffDAO().updateShiftTime(newTime, u.getUserID());
 
                     if (success) {
                         new AlertUser().showAlert(Alert.AlertType.INFORMATION, "Success", "Shift Time Updated!");
                         displayLabel.setText(newTime.toString());
 
-                        if (currentUser instanceof Staff) {
-                            ((Staff) currentUser).setShiftTime(newTime);
+                        if (u != null) {
+                            u.setShiftTime(newTime);
                         }
                     } else {
                         new AlertUser().showAlert(Alert.AlertType.ERROR, "Error", "Database update failed!");
@@ -439,7 +600,8 @@ public class ManagerDashboardWindow {
             }
         });
     }
-    private void handleUpdateSalary(Label displayLabel){
+
+    private void handleUpdateSalary(Label displayLabel) {
         TextInputDialog dialog = new TextInputDialog(displayLabel.getText());
         dialog.setTitle("Update Shift Time");
         dialog.setHeaderText("Change Salary");
@@ -456,17 +618,18 @@ public class ManagerDashboardWindow {
                     displayLabel.setText(String.valueOf(newSalary));
 
                     if (u != null) {
-                        ((Staff) u).setSalary(newSalary);
+                        u.setSalary(newSalary);
                     }
                 } else {
                     new AlertUser().showAlert(Alert.AlertType.ERROR, "Error", "Database update failed!");
                 }
-            }else {
+            } else {
                 new AlertUser().showAlert(Alert.AlertType.ERROR, "Invalid Input", "Invalid salary!");
             }
         });
     }
-    private void handleUpdate(String field, Label displayLabel){
+
+    private void handleUpdate(String field, Label displayLabel) {
         TextInputDialog dialog = new TextInputDialog(displayLabel.getText());
         dialog.setTitle("Update " + field);
         dialog.setHeaderText("Change " + field);
@@ -474,25 +637,24 @@ public class ManagerDashboardWindow {
 
         dialog.showAndWait().ifPresent(newValue -> {
             if (!newValue.trim().isEmpty()) {
-                // Update the Database (You'll need a method in UserDAO)
-                boolean success = new CustomerDAO().updateUser(field,newValue, u.getUserID());
+                boolean success = new UserDAO().updateUser(field, newValue, u.getUserID());
                 if (success) {
                     new AlertUser().showAlert(Alert.AlertType.INFORMATION, "Success", "Update Successful!");
                     displayLabel.setText(newValue);
                     if (field.equals("username")) u.setUsername(newValue);
                     if (field.equals("phone")) u.setPhone(newValue);
-                }
-                else{
+                } else {
                     new AlertUser().showAlert(Alert.AlertType.ERROR, "Error", "Error in updating information!");
                 }
             }
         });
     }
-    private void handleStaffSignUp(String uname, String pass, String ph, String job, String s, LocalDate hd, String shift){
+
+    private void handleStaffSignUp(String uname, String pass, String ph, String job, String s, LocalDate hd, String shift) {
         int count = new CustomerDAO().getCustomerCountWithUsername(uname);
-        if(count>0) {
-            new AlertUser().showAlert(Alert.AlertType.ERROR,"Username Error", "Username already taken!");
-        }else{
+        if (count > 0) {
+            new AlertUser().showAlert(Alert.AlertType.ERROR, "Username Error", "Username already taken!");
+        } else {
             LocalTime startTime = switch (shift) {
                 case "Morning" -> LocalTime.of(6, 0); // 06:00 AM
                 case "Evening" -> LocalTime.of(14, 0); // 02:00 PM
@@ -501,20 +663,20 @@ public class ManagerDashboardWindow {
             };
             if (!uname.isEmpty() && !pass.isEmpty()) {
                 User u = new SignUp().registerUser(uname, ph, pass, "Staff", Long.parseLong(s), startTime, hd, job);
-                if(u!=null) {
-                    new AlertUser().showAlert(Alert.AlertType.INFORMATION, "Hiring Success", "New staff " + u.getUsername() + "Successfully Hired!");
+                if (u != null) {
+                    new AlertUser().showAlert(Alert.AlertType.INFORMATION, "Hiring Success", "New staff " + u.getUsername() + " Successfully Hired!");
                 }
-            }
-            else{
+            } else {
                 new AlertUser().showAlert(Alert.AlertType.ERROR, "Invalid Input", "Invalid Username or Password!");
             }
         }
     }
-    private void handleStaffFiring(String id){
+
+    private void handleStaffFiring(String id) {
         Staff s = new StaffDAO().getStaffByUserId(Integer.parseInt(id));
-        if(s!=null && s.getJobTitle().equals("Manager")){
+        if (s != null && s.getJobTitle().equals("Manager")) {
             new AlertUser().showAlert(Alert.AlertType.ERROR, "ERROR", "You cannot fire a manager!");
-        }else {
+        } else {
             if (s != null) {
                 boolean b = new StaffDAO().deleteStaffRecord(Integer.parseInt(id));
                 if (b) {
@@ -527,7 +689,214 @@ public class ManagerDashboardWindow {
             }
         }
     }
-    // Placeholders for your logic
-    private void showRecordView(String type) { /* TableView Logic */ }
-    private void showPricingConfig() { /* Pricing Form Logic */ }
+
+    private void showUpdateFloor(){
+        contentArea.getChildren().clear();
+        contentArea.setSpacing(20);
+
+        Label title = new Label("System Floor Management");
+        title.setFont(Font.font("Verdana", FontWeight.BOLD, 22));
+        title.setTextFill(Color.web("#2c3e50"));
+
+        VBox tableCard = new VBox(15);
+        tableCard.setPadding(new Insets(20));
+        tableCard.setStyle("-fx-background-color: white; -fx-background-radius: 10; " +
+                "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 5);");
+
+        TableView<Floor> pricingTable = createFloorTable();
+
+        // Fetch all 4 records from DB
+        ObservableList<Floor> data = FXCollections.observableArrayList(
+                new FloorDAO().getFloorByFloorNumber(1),
+                new FloorDAO().getFloorByFloorNumber(2),
+                new FloorDAO().getFloorByFloorNumber(3),
+                new FloorDAO().getFloorByFloorNumber(4)
+        );
+
+        pricingTable.setItems(data);
+        tableCard.getChildren().add(pricingTable);
+
+        contentArea.getChildren().addAll(title, new Separator(), tableCard);
+    }
+
+    private TableView<Floor> createFloorTable() {
+        TableView<Floor> table = new TableView<>();
+        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
+        table.setPrefHeight(250);
+
+        TableColumn<Floor, String> colCategory = new TableColumn<>("Floor no.");
+        colCategory.setCellValueFactory(new PropertyValueFactory<>("FloorNumber"));
+
+        TableColumn<Floor, String> colType = new TableColumn<>("No. of fuel spaces");
+        colType.setCellValueFactory(new PropertyValueFactory<>("NoOfFuelSpaces"));
+
+        TableColumn<Floor, Double> colHourly = new TableColumn<>("No. of electric spaces");
+        colHourly.setCellValueFactory(new PropertyValueFactory<>("NoOfElectricSpaces"));
+
+        TableColumn<Floor, Double> colMin = new TableColumn<>("Total no. of spaces");
+        colMin.setCellValueFactory(new PropertyValueFactory<>("TotalNoOfSpaces"));
+
+        // Add an Action Column for the Edit Button
+        TableColumn<Floor, Void> colAction = new TableColumn<>("Action");
+        colAction.setCellFactory(_ -> new TableCell<>() {
+            private final Button btn = new Button("Edit");
+
+            {
+                btn.setStyle("-fx-background-color: #3498db; -fx-text-fill: white; -fx-cursor: hand;");
+                btn.setOnAction(_ -> {
+                    Floor f = getTableView().getItems().get(getIndex());
+                    handleFloorEdit(f);
+                });
+            }
+
+            @Override
+            protected void updateItem(Void item, boolean empty) {
+                super.updateItem(item, empty);
+                setGraphic(empty ? null : btn);
+            }
+        });
+
+        table.getColumns().addAll(colCategory, colType, colHourly, colMin, colAction);
+        return table;
+    }
+
+    private void handleFloorEdit(Floor f){
+        Dialog<ButtonType> dialog = new Dialog<>();
+        dialog.setTitle("Update No. of spaces");
+        dialog.setHeaderText("Updating Rates for floor number: " + f.getFloorNumber());
+
+        ButtonType updateButtonType = new ButtonType("Update", ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(updateButtonType, ButtonType.CANCEL);
+
+        // 3. Create the layout and fields
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.setPadding(new Insets(20, 150, 10, 10));
+
+        TextField electricSpacesField = new TextField(String.valueOf(f.getNoOfElectricSpaces()));
+        electricSpacesField.setPromptText("No. of electric spaces");
+
+        TextField fuelSpacesField = new TextField(String.valueOf(f.getNoOfFuelSpaces()));
+        fuelSpacesField.setPromptText("No. of fuel spaces");
+
+        grid.add(new Label("New no. of electric spaces:"), 0, 0);
+        grid.add(electricSpacesField, 1, 0);
+        grid.add(new Label("New no. of fuel spaces:"), 0, 1);
+        grid.add(fuelSpacesField, 1, 1);
+
+        dialog.getDialogPane().setContent(grid);
+
+        // 4. Handle the result
+        dialog.showAndWait().ifPresent(response -> {
+            if (response == updateButtonType) {
+                try {
+                    int newElectric = Integer.parseInt(electricSpacesField.getText());
+                    int newFuel = Integer.parseInt(fuelSpacesField.getText());
+
+                    // Call your DAO to update both values
+                    boolean success = new FloorDAO().updateFloor(f.getFloorNumber(),newElectric,newFuel);
+
+                    if (success) {
+                        new AlertUser().showAlert(Alert.AlertType.INFORMATION, "Success", "Floor updated successfully!");
+                        showUpdateFloor(); // Refresh the table to show new values
+                    }
+                } catch (NumberFormatException e) {
+                    new AlertUser().showAlert(Alert.AlertType.ERROR, "Input Error", "Please enter valid numeric values.");
+                }
+            }
+        });
+    }
+
+    private void handleUpdateSpace(String field, Label displayLabel) {
+        TextInputDialog dialog = new TextInputDialog(displayLabel.getText());
+        dialog.setTitle("Update " + field);
+        dialog.setHeaderText("Change " + field);
+        dialog.setContentText("Enter new " + field + ":");
+        dialog.showAndWait().ifPresent(newValue -> {
+            if (!newValue.trim().isEmpty()) {
+                boolean success = new ParkingSpaceDAO().updateSpace(parkSpace.getFloorNumber(),parkSpace.getRowNumber(),parkSpace.getColumnNumber(),(field.equals("category"))?newValue: parkSpace.getCategory(), (field.equals("type"))?newValue:parkSpace.getType());
+                if (success) {
+                    new AlertUser().showAlert(Alert.AlertType.INFORMATION, "Success", "Update Successful!");
+                    displayLabel.setText(newValue);
+                    if(field.equals("category")){
+                        parkSpace.setCategory(newValue);
+                    }else{
+                        parkSpace.setType(newValue);
+                    }
+                } else {
+                    new AlertUser().showAlert(Alert.AlertType.ERROR, "Error", "Error in updating information!");
+                }
+            }
+        });
+    }
+
+    private void showUpdateSpace(){
+        contentArea.getChildren().clear();
+        Label title = new Label("Update parking space at: ");
+        title.setFont(Font.font("Arial", FontWeight.BOLD, 22));
+
+        TextField floorField = new TextField();
+        floorField.setPromptText("Floor Number : ");
+        floorField.setMaxWidth(300);
+        floorField.setPrefHeight(40);
+
+        TextField rowField = new TextField();
+        rowField.setPromptText("Row Number : ");
+        rowField.setMaxWidth(300);
+        rowField.setPrefHeight(40);
+
+        TextField columnField = new TextField();
+        columnField.setPromptText("Column Number : ");
+        columnField.setMaxWidth(300);
+        columnField.setPrefHeight(40);
+
+        Button btnView = new Button("View Parking Space Details");
+        btnView.setStyle("-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-weight: bold;");
+        btnView.setPrefSize(200, 40);
+
+        btnView.setOnAction(_ -> {
+            int inputFloor = Integer.parseInt(floorField.getText());
+            int inputRow = Integer.parseInt(rowField.getText());
+            int inputColumn = Integer.parseInt(columnField.getText());
+            if (floorField.getText().isEmpty() || rowField.getText().isEmpty() || columnField.getText().isEmpty()) {
+                new AlertUser().showAlert(Alert.AlertType.WARNING, "Input Error", "No empty fields allowed!");
+                return;
+            }
+
+            parkSpace = new ParkingSpaceDAO().getParkingSpaceByRowColFloor(inputRow,inputColumn,inputFloor);
+
+            if (parkSpace == null) {
+                new AlertUser().showAlert(Alert.AlertType.ERROR, "Not Found", "No such parking space found!");
+                return;
+            }
+            contentArea.getChildren().clear();
+            contentArea.setSpacing(30);
+            contentArea.setAlignment(Pos.TOP_CENTER);
+
+            Label t = new Label("Updating Record for parking space at Floor: "+inputFloor+", Row: "+inputRow+", Column: "+inputColumn);
+            t.setFont(Font.font("Verdana", FontWeight.BOLD, 24));
+            t.setTextFill(Color.web("#2c3e50"));
+
+            VBox profileCard = new VBox(20);
+            profileCard.setPadding(new Insets(30));
+            profileCard.setMaxWidth(500);
+            profileCard.setStyle("-fx-background-color: white; " +
+                    "-fx-background-radius: 10; " +
+                    "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 5);");
+
+            profileCard.getChildren().addAll(
+                    createRecordRow("Vehicle Category", parkSpace.getCategory(), "category"),
+                    new Separator(),
+                    createRecordRow("Vehicle Type", parkSpace.getType(), "type")
+            );
+
+            Button btnBack = new Button("Back to Search");
+            btnBack.setOnAction(_ -> showUpdateSpace());
+
+            contentArea.getChildren().addAll(t, profileCard, btnBack);
+        });
+
+        contentArea.getChildren().addAll(title, floorField, rowField, columnField, btnView);
+    }
 }

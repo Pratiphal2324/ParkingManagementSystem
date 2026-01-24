@@ -47,6 +47,14 @@ public class ParkingSpace {
         this.category = category;
     }
 
+    public String getType() {
+        return type;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
     public boolean isOccupied() { return isOccupied; }
     public void setOccupied(boolean occupied) { isOccupied = occupied; }
 

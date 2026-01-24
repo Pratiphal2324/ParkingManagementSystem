@@ -22,6 +22,7 @@ import logic.AlertUser;
 import logic.SignIn;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class LoginView {
     VBox vehicleList;
@@ -32,7 +33,7 @@ public class LoginView {
         StackPane root = new StackPane();
 
         try {
-            Image bgImg = new Image(getClass().getResourceAsStream("/Images/parking_bg.jpg"));
+            Image bgImg = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/Images/parking_bg.jpg")));
             BackgroundImage bImg = new BackgroundImage(bgImg,
                     BackgroundRepeat.NO_REPEAT,
                     BackgroundRepeat.NO_REPEAT,
@@ -98,7 +99,7 @@ public class LoginView {
         scrollPane.setVisible(false);
         scrollPane.setManaged(false);
 
-        loginBtn.setOnMouseClicked(e-> {
+        loginBtn.setOnMouseClicked(_ -> {
             User u = new SignIn().validateLogin(usernameField.getText(),passwordField.getText());
             if(u instanceof Customer) {
                 Customer c = new CustomerDAO().getCustomerByUsernamePassword(usernameField.getText(),passwordField.getText());
@@ -108,9 +109,7 @@ public class LoginView {
                     boolean isEmpty = loadUserVehicles(c);
                     Hyperlink vehicleRegister = new Hyperlink("Register new vehicle? Click here");
                     vehicleRegister.setStyle("-fx-text-fill: #2980b9; -fx-underline: false; -fx-font-weight: bold;");
-                    vehicleRegister.setOnMouseClicked(f -> {
-                        showVehicleRegistration(loginCard, new CustomerDAO().getCustomerByUserId(u.getUserID()));
-                    });
+                    vehicleRegister.setOnMouseClicked(_ -> showVehicleRegistration(loginCard, new CustomerDAO().getCustomerByUserId(u.getUserID())));
                     vehicleList.getChildren().add(vehicleRegister);
                     if (isEmpty) {
                         loginBtn.setText("Register New Vehicle");
@@ -140,12 +139,12 @@ public class LoginView {
         });
 
 
-        loginBtn.setOnMouseEntered(e -> loginBtn.setStyle("-fx-background-color: #34495e; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-background-radius: 8;"));
-        loginBtn.setOnMouseExited(e -> loginBtn.setStyle("-fx-background-color: #2c3e50; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-background-radius: 8;"));
+        loginBtn.setOnMouseEntered(_ -> loginBtn.setStyle("-fx-background-color: #34495e; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-background-radius: 8;"));
+        loginBtn.setOnMouseExited(_ -> loginBtn.setStyle("-fx-background-color: #2c3e50; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-background-radius: 8;"));
 
         Hyperlink signupLink = new Hyperlink("Don't have an account? Sign Up");
         signupLink.setStyle("-fx-text-fill: #2980b9; -fx-underline: false; -fx-font-weight: bold;");
-        signupLink.setOnMouseClicked(e->{
+        signupLink.setOnMouseClicked(_ ->{
             SignupView signupView = new SignupView();
             Scene signupScene = signupView.createSignupScene("Customer");
 
@@ -160,7 +159,6 @@ public class LoginView {
         return new Scene(root, 900, 650);
     }
     public boolean loadUserVehicles(Customer c) {
-        VBox container = new VBox(10);
         vehicleList.setAlignment(Pos.CENTER);
         vehicleList.getChildren().clear();
         ArrayList<String> list = new VehicleDAO().getVehiclePlateByUserId(c.getUserID());
@@ -172,7 +170,7 @@ public class LoginView {
             plateBtn.setPrefWidth(250);
             plateBtn.setStyle("-fx-background-color: #34495e; -fx-text-fill: white;");
 
-            plateBtn.setOnAction(e -> {
+            plateBtn.setOnAction(_ -> {
                 Stage stage = (Stage) plateBtn.getScene().getWindow();
                 stage.close();
                 new CustomerDashboardWindow(c).show(stage);
@@ -198,7 +196,7 @@ public class LoginView {
         plateBox.getChildren().addAll(lblPlate, plateField);
 
         VBox catBox = new VBox(5);
-        Label lblCategory = new Label("Energy Source:");
+        Label lblCategory = new Label("Vehicle Category:");
         ToggleGroup categoryGroup = new ToggleGroup();
         RadioButton rbElectric = new RadioButton("TwoWheeler");
         rbElectric.setToggleGroup(categoryGroup);
@@ -224,7 +222,7 @@ public class LoginView {
         btnSubmit.setPrefHeight(40);
         btnSubmit.setStyle("-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;");
 
-        btnSubmit.setOnAction(e -> {
+        btnSubmit.setOnAction(_ -> {
             String plate = plateField.getText().trim();
             String selectedCat = ((RadioButton) categoryGroup.getSelectedToggle()).getText();
             String selectedType = ((RadioButton) typeGroup.getSelectedToggle()).getText();
@@ -232,18 +230,14 @@ public class LoginView {
             if (plate.isEmpty()) {
                 plateField.setStyle("-fx-border-color: red;");
             } else {
-                if (new VehicleDAO().getVehicleByNumberPlate(plate) != null) {
-                    new AlertUser().showAlert(Alert.AlertType.ERROR, "Vehicle Registration Error", "Vehicle already registered!");
-                } else {
-                    Vehicle v = new VehicleDAO().registerVehicle(plate, selectedCat, selectedType, u.getUserID());
-                    if (v == null) {
-                        new AlertUser().showAlert(Alert.AlertType.ERROR, "Registration Error", "Vehicle Registration not successful! Please Try Again");
+                Vehicle v = new VehicleDAO().registerVehicle(plate, selectedCat, selectedType, u.getUserID());
+                if (v == null) {
+                    new AlertUser().showAlert(Alert.AlertType.ERROR, "Registration Error", "Vehicle Registration not successful! Please Try Again");
                     }
-                    else{
-                        Stage stage = (Stage) plateField.getScene().getWindow();
-                        stage.close();
-                        new StaffDashboardWindow(u).show(stage);
-                    }
+                else{
+                    Stage stage = (Stage) plateField.getScene().getWindow();
+                    stage.close();
+                    new CustomerDashboardWindow(u).show(stage);
                 }
             }
         });

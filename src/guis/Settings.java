@@ -1,6 +1,6 @@
 package guis;
 
-import DAOs.CustomerDAO;
+import DAOs.UserDAO;
 import entities.User;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -70,7 +70,7 @@ public class Settings {
         Button btnEdit = new Button("Edit");
         btnEdit.setStyle("-fx-background-color: #3498db; -fx-text-fill: white; -fx-background-radius: 5; -fx-cursor: hand;");
 
-        btnEdit.setOnAction(e -> {
+        btnEdit.setOnAction(_ -> {
             if (type.equals("password")) handlePasswordChange();
             else handleUpdate(type, lblValue);
         });
@@ -102,16 +102,16 @@ public class Settings {
 
         Button btnCancel = new Button("Back to Settings");
         btnCancel.setStyle("-fx-background-color: transparent; -fx-text-fill: #7f8c8d;");
-        btnCancel.setOnAction(e -> showSettings());
+        btnCancel.setOnAction(_ -> showSettings());
 
-        btnUpdate.setOnAction(e -> {
+        btnUpdate.setOnAction(_ -> {
             // Logic remains the same, but now inside this fancy UI
             if (!pfCurrent.getText().equals(u.getPassword())) {
                 new AlertUser().showAlert(Alert.AlertType.ERROR, "Security Error", "Current password incorrect!");
             } else if (!pfNew.getText().equals(pfConfirm.getText()) || pfNew.getText().isEmpty()) {
                 new AlertUser().showAlert(Alert.AlertType.ERROR, "Match Error", "Passwords do not match!");
             } else {
-                boolean success = new DAOs.CustomerDAO().updateUser("password", pfNew.getText(), u.getUserID());
+                boolean success = new DAOs.UserDAO().updateUser("password", pfNew.getText(), u.getUserID());
                 if (success) {
                     u.setPassword(pfNew.getText());
                     new AlertUser().showAlert(Alert.AlertType.INFORMATION, "Success", "Password updated safely!");
@@ -140,7 +140,7 @@ public class Settings {
         dialog.showAndWait().ifPresent(newValue -> {
             if (!newValue.trim().isEmpty()) {
                 // Update the Database (You'll need a method in UserDAO)
-                boolean success = new CustomerDAO().updateUser(field,newValue, u.getUserID());
+                boolean success = new UserDAO().updateUser(field,newValue, u.getUserID());
                 if (success) {
                     new AlertUser().showAlert(Alert.AlertType.INFORMATION, "Success", "Update Successful!");
                     displayLabel.setText(newValue);
@@ -153,35 +153,4 @@ public class Settings {
             }
         });
     }
-//    public void handlePasswordChange(){
-//        contentArea.getChildren().clear();
-//        GridPane grid = new GridPane();
-//        grid.setHgap(20);
-//        grid.setVgap(20);
-//        PasswordField pfCurrent = new PasswordField();
-//        PasswordField pfNew = new PasswordField();
-//        PasswordField pfNewConfirm = new PasswordField();
-//        pfCurrent.setPromptText("Enter current password : ");
-//        pfNew.setPromptText("Enter new password : ");
-//        pfNewConfirm.setPromptText("Confirm new password : ");
-//        Button btn = new Button("Change Password");
-//        grid.add(pfCurrent, 0, 0);
-//        grid.add(pfNew, 0, 1);
-//        grid.add(pfNewConfirm, 0, 2);
-//        grid.add(btn, 0, 3);
-//        btn.setOnAction(e->{
-//            boolean success = new CustomerDAO().updateUser("password", pfNew.getText(), u.getUserID());
-//            boolean confirmedPassword = pfNew.getText().equals(pfNewConfirm.getText());
-//            if(confirmedPassword) {
-//                if (success) {
-//                    new AlertUser().showAlert(Alert.AlertType.INFORMATION, "Success", "Password Update Successful!");
-//                } else {
-//                    new AlertUser().showAlert(Alert.AlertType.ERROR, "ERROR", "Password Update Error!");
-//                }
-//            }else{
-//                new AlertUser().showAlert(Alert.AlertType.ERROR, "ERROR", "Passwords do not match! Try again!");
-//            }
-//        });
-//        contentArea.getChildren().addAll(grid);
-//    }
 }

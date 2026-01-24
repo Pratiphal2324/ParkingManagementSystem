@@ -32,7 +32,7 @@ public class VehicleDAO {
         return null;
     }
     public Vehicle getVehicleByNumberPlate(String numberPlate){
-        String sql = "SELECT * FROM vehicle WHERE numberPlate = ?";
+        String sql = "SELECT * FROM view_vehicle WHERE numberPlate = ?";
         try(Connection conn = DatabaseConnection.getConnection();
             PreparedStatement pstmt = conn.prepareStatement(sql)){
             pstmt.setString(1,numberPlate);
@@ -53,7 +53,7 @@ public class VehicleDAO {
         return null;
     }
     public ArrayList<String> getVehiclePlateByUserId(int userID){
-        String sql = "SELECT numberPlate FROM vehicle WHERE DriverID = ?";
+        String sql = "SELECT numberPlate FROM view_vehicle WHERE DriverID = ?";
         ArrayList<String> list = new ArrayList<>();
         try(Connection conn = DatabaseConnection.getConnection();
             PreparedStatement pstmt = conn.prepareStatement(sql)){
@@ -77,17 +77,24 @@ public class VehicleDAO {
             ResultSet rs = pstmt.executeQuery();
             if(rs.next()) {
                 timestamp = rs.getTimestamp("checkOutTime"); // or checkInTime
-                boolean b = timestamp != null;
-                if(!b){
-                    return false;
-                }
-                else{
-                    return true;
-                }
+                return timestamp != null;
             }
             else{
                 return true;
             }
+        }catch(SQLException e){
+            System.out.println(e.getMessage());
+        }
+        return false;
+    }
+    public boolean checkVehicleOwnership(String vehiclePlate, int driverID){
+        String sql = "SELECT * FROM vehicle WHERE numberPlate = ? AND DriverID = ?";
+        try(Connection conn = DatabaseConnection.getConnection();
+            PreparedStatement pstmt = conn.prepareStatement(sql)){
+            pstmt.setString(1,vehiclePlate);
+            pstmt.setInt(2,driverID);
+            ResultSet rs = pstmt.executeQuery();
+            return rs.next();
         }catch(SQLException e){
             System.out.println(e.getMessage());
         }

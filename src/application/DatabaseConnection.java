@@ -21,7 +21,7 @@ public class DatabaseConnection {
         }
         return connection;
     }
-    public static void main(String[] args) {
+    public static void main() {
         Connection conn = DatabaseConnection.getConnection();
         if (conn != null) {
             System.out.println("Success! Your Java code can see XAMPP.");

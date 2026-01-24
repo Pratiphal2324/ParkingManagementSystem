@@ -1,9 +1,9 @@
 package guis;
 
 import DAOs.ParkingSpaceDAO;
+import DAOs.PricingDAO;
 import DAOs.TransactionDAO;
 import DAOs.VehicleDAO;
-import entities.Pricing;
 import entities.Transaction;
 import entities.User;
 import entities.Vehicle;
@@ -29,7 +29,7 @@ import java.util.List;
 public class StaffDashboardWindow {
     private BorderPane root;
     private VBox contentArea;
-    private User currentUser;
+    private final User currentUser;
 
     public StaffDashboardWindow(User user) {
         this.currentUser = user;
@@ -54,8 +54,8 @@ public class StaffDashboardWindow {
         Button btnSettings = createMenuButton("Settings");
         Button btnLogout = createMenuButton("Logout");
 
-        btnSettings.setOnAction(e->new Settings(contentArea,currentUser).showSettings());
-        btnLogout.setOnAction(e->{
+        btnSettings.setOnAction(_ ->new Settings(contentArea,currentUser).showSettings());
+        btnLogout.setOnAction(_ ->{
             LoginView loginView = new LoginView();
             Scene loginScene = loginView.createLoginScene();
 
@@ -69,10 +69,10 @@ public class StaffDashboardWindow {
         contentArea.setAlignment(Pos.TOP_CENTER);
         contentArea.setStyle("-fx-background-color: #ecf0f1;");
 
-        btnCheckIn.setOnAction(e -> showCheckInView()); // Link to new method
-        btnCheckOut.setOnAction(e -> showCheckOutView());
-        btnHistoryUser.setOnAction(e -> showHistoryView("Search by User ID", "Enter ID..."));
-        btnHistoryPlate.setOnAction(e -> showHistoryView("Search by Plate", "Enter Plate..."));
+        btnCheckIn.setOnAction(_ -> showCheckInView()); // Link to new method
+        btnCheckOut.setOnAction(_ -> showCheckOutView());
+        btnHistoryUser.setOnAction(_ -> showHistoryView("Search by User ID", "Enter ID..."));
+        btnHistoryPlate.setOnAction(_ -> showHistoryView("Search by Plate", "Enter Plate..."));
 
         root.setLeft(sidebar);
         root.setCenter(contentArea);
@@ -107,11 +107,15 @@ public class StaffDashboardWindow {
         Label statusLabel = new Label();
         statusLabel.setFont(Font.font("Verdana", 14));
 
-        btnConfirmIn.setOnAction(e -> {
+        btnConfirmIn.setOnAction(_ -> {
             String plate = plateField.getText();
             int f,r,c;
             Vehicle v = new VehicleDAO().getVehicleByNumberPlate(plate);
-
+            boolean verifyOwnership = new VehicleDAO().checkVehicleOwnership(plate,Integer.parseInt(driverIdField.getText()));
+            if(!verifyOwnership){
+                new AlertUser().showAlert(Alert.AlertType.ERROR,"ERROR","Driver not registered to this vehicle!");
+                return;
+            }
             if (v != null) {
                 String s = new ParkingSpaceDAO().assignParkingSpace(v);
                 boolean b = new VehicleDAO().checkIfCheckedOut(v);
@@ -126,12 +130,13 @@ public class StaffDashboardWindow {
                         Transaction t = new Transaction(
                                 0,
                                 v,
-                                new Pricing(v.getCategory(), v.getType()),
+                                new PricingDAO().getPricingByTypeCategory(v.getCategory(), v.getType()),
                                 new ParkingSpaceDAO().getParkingSpaceByRowColFloor(r, c, f),
                                 LocalDateTime.now(),
                                 Integer.parseInt(driverIdField.getText())
                         );
                         int id = new TransactionDAO().saveNewTransaction(t);
+                        new ParkingSpaceDAO().updateOccupiedTo1(r,c,f);
                         t.setTransactionID(id);
                     }
                 } else {
@@ -166,11 +171,11 @@ public class StaffDashboardWindow {
         Label statusLabel = new Label();
         statusLabel.setFont(Font.font("Verdana", 14));
 
-        btnCalculate.setOnAction(e -> {
+        btnCalculate.setOnAction(_ -> {
             String plate = plateField.getText();
             Vehicle v = new VehicleDAO().getVehicleByNumberPlate(plate);
             int id,f,r,c,d;
-            String checkIn = "";
+            String checkIn;
             if (v != null) {
                     boolean b = new VehicleDAO().checkIfCheckedOut(v);
                     if(!b) {
@@ -188,13 +193,14 @@ public class StaffDashboardWindow {
                             Transaction t = new Transaction(
                                     id,
                                     v,
-                                    new Pricing(v.getCategory(), v.getType()),
+                                    new PricingDAO().getPricingByTypeCategory(v.getType(), v.getCategory()),
                                     new ParkingSpaceDAO().getParkingSpaceByRowColFloor(r,c,f),
                                     LocalDateTime.parse(checkIn),
                                     d
                             );
                             t.processCheckout();
                             new TransactionDAO().updateCheckOut(t);
+                            new ParkingSpaceDAO().updateOccupiedTo0(r,c,f);
                             receiptArea.setText("Vehicle Number Plate: "+plate+"\n"+t.displayBill());
                         }
                     }else{
@@ -245,7 +251,7 @@ public class StaffDashboardWindow {
         col9.setCellValueFactory(new PropertyValueFactory<>("TotalFee"));
         table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
 
-        searchBtn.setOnAction(e -> {
+        searchBtn.setOnAction(_ -> {
             try {
                 String input = idField.getText();
                 if(titleText.equals("Search by User ID")) {
@@ -264,7 +270,6 @@ public class StaffDashboardWindow {
                 new AlertUser().showAlert(Alert.AlertType.ERROR, "Error!", f.getMessage());
             }
             catch (Exception ex) {
-                ex.printStackTrace();
                 new AlertUser().showAlert(Alert.AlertType.ERROR, "Search Error", "Invalid User ID or Database Error");
             }
         });
