@@ -45,7 +45,7 @@ public class FloorDAO {
         return false;
     }
     public int getTotalSpaces(){
-        String sql = "SELECT COUNT(totalNoOfSpaces) as sum FROM view_floor";
+        String sql = "SELECT SUM(totalNoOfSpaces) as sum FROM view_floor";
         int n=0;
         try(Connection conn = DatabaseConnection.getConnection();
             PreparedStatement pstmt = conn.prepareStatement(sql)){
