@@ -61,7 +61,7 @@ public class TransactionDAO {
         }
         return 0;
     }
-    public void updateCheckOut(Transaction trans) {
+    public boolean updateCheckOut(Transaction trans) {
         String sql = "UPDATE transaction SET CheckoutTime = ?, totalFee = ? WHERE TransactionID = ?";
 
         try (Connection conn = DatabaseConnection.getConnection();
@@ -74,12 +74,15 @@ public class TransactionDAO {
             int rowsAffected = pstmt.executeUpdate();
             if (rowsAffected > 0) {
                 System.out.println("Check-out updated in database.");
+                return true;
             } else {
                 System.out.println("Update failed: Transaction ID " + trans.getTransactionID() + " not found.");
+                return false;
             }
         } catch (SQLException e) {
             System.out.println("Error updating Check-Out: " + e.getMessage());
         }
+        return false;
     }
     public String getTransactionByVehiclePlate(String plate){
         String sql = "SELECT * FROM view_transaction WHERE VehiclePlate = ? ORDER BY TransactionID DESC LIMIT 1";

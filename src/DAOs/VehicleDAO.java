@@ -76,7 +76,7 @@ public class VehicleDAO {
             pstmt.setString(1,v.getNumberPlate());
             ResultSet rs = pstmt.executeQuery();
             if(rs.next()) {
-                timestamp = rs.getTimestamp("checkOutTime"); // or checkInTime
+                timestamp = rs.getTimestamp("checkOutTime");
                 return timestamp != null;
             }
             else{

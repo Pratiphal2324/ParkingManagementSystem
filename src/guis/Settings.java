@@ -26,12 +26,10 @@ public class Settings {
         contentArea.setSpacing(30);
         contentArea.setAlignment(Pos.TOP_CENTER);
 
-        // Header section
         Label title = new Label("Account Settings");
         title.setFont(Font.font("Verdana", FontWeight.BOLD, 24));
         title.setTextFill(Color.web("#2c3e50"));
 
-        // Profile Card
         VBox profileCard = new VBox(20);
         profileCard.setPadding(new Insets(30));
         profileCard.setMaxWidth(500);
@@ -105,7 +103,6 @@ public class Settings {
         btnCancel.setOnAction(_ -> showSettings());
 
         btnUpdate.setOnAction(_ -> {
-            // Logic remains the same, but now inside this fancy UI
             if (!pfCurrent.getText().equals(u.getPassword())) {
                 new AlertUser().showAlert(Alert.AlertType.ERROR, "Security Error", "Current password incorrect!");
             } else if (!pfNew.getText().equals(pfConfirm.getText()) || pfNew.getText().isEmpty()) {
@@ -139,7 +136,6 @@ public class Settings {
 
         dialog.showAndWait().ifPresent(newValue -> {
             if (!newValue.trim().isEmpty()) {
-                // Update the Database (You'll need a method in UserDAO)
                 boolean success = new UserDAO().updateUser(field,newValue, u.getUserID());
                 if (success) {
                     new AlertUser().showAlert(Alert.AlertType.INFORMATION, "Success", "Update Successful!");

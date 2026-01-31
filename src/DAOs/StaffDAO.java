@@ -119,4 +119,21 @@ public class StaffDAO {
         }
         return n;
     }
+
+    public int getStaffCountWithUsername(String uname){
+        String sql = "select COUNT(*) as count FROM user INNER JOIN staff ON user.userID = staff.userID where username = ?";
+        try(Connection conn = DatabaseConnection.getConnection();
+            PreparedStatement pstmt = conn.prepareStatement(sql)){
+            pstmt.setString(1,uname);
+            ResultSet rs = pstmt.executeQuery();
+            if(rs.next()){
+                return rs.getInt("count");
+            }else{
+                return 0;
+            }
+        }catch(SQLException e){
+            System.out.println(e.getMessage());
+        }
+        return 0;
+    }
 }

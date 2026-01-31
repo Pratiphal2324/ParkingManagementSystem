@@ -102,9 +102,9 @@ public class SignupView {
             new AlertUser().showAlert(Alert.AlertType.ERROR,"Username Error", "Username already taken!");
         }else{
             LocalTime startTime = switch (shift) {
-                case "Morning" -> LocalTime.of(6, 0); // 06:00 AM
-                case "Evening" -> LocalTime.of(14, 0); // 02:00 PM
-                case "Night" -> LocalTime.of(22, 0); // 10:00 PM
+                case "Morning" -> LocalTime.of(6, 0);
+                case "Evening" -> LocalTime.of(14, 0);
+                case "Night" -> LocalTime.of(22, 0);
                 default -> LocalTime.of(9, 0);
             };
             if (!uname.isEmpty() && !pass.isEmpty()) {
@@ -146,7 +146,6 @@ public class SignupView {
             }
         }
     }
-    // Helper methods for consistent styling
     private TextField createStyledField(String prompt) {
         TextField f = new TextField();
         f.setPromptText(prompt);

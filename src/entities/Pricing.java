@@ -1,10 +1,14 @@
 package entities;
+
+import exceptions.InvalidVehicleCategoryException;
+import exceptions.InvalidVehicleTypeException;
+
 public class Pricing {
     private final String vehicleCategory;
     private final String vehicleType;
     private double hourlyRate;
     private double minPrice;
-    public Pricing(String vehicleCategory, String vehicleType, double hourlyRate, double minPrice){
+    public Pricing(String vehicleCategory, String vehicleType, double hourlyRate, double minPrice) throws InvalidVehicleTypeException, InvalidVehicleCategoryException {
         this.vehicleCategory = vehicleCategory;
         this.vehicleType = vehicleType;
         this.hourlyRate = hourlyRate;

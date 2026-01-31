@@ -11,7 +11,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.VBox; // Changed to VBox
+import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import logic.AlertUser;
@@ -22,7 +22,7 @@ import java.util.List;
 public class CustomerDashboardWindow {
     private Stage stage;
     private final User currentUser;
-    private VBox contentArea; // Changed from StackPane to VBox
+    private VBox contentArea;
 
     public CustomerDashboardWindow(User user) {
         this.currentUser = user;
@@ -34,11 +34,10 @@ public class CustomerDashboardWindow {
 
         BorderPane mainLayout = new BorderPane();
 
-        // --- SIDEBAR NAVIGATION (Updated to match Staff style) ---
         VBox sidebar = new VBox(15);
         sidebar.setPadding(new Insets(20));
         sidebar.setStyle("-fx-background-color: #2c3e50;");
-        sidebar.setPrefWidth(220); // Matched Staff width
+        sidebar.setPrefWidth(220);
 
         Label lblWelcome = new Label("Welcome,\n" + currentUser.getUsername());
         lblWelcome.setTextFill(javafx.scene.paint.Color.WHITE);
@@ -49,7 +48,6 @@ public class CustomerDashboardWindow {
         Button btnSettings = createNavButton("Settings");
         Button btnLogout = createNavButton("Logout");
 
-        // Action Handlers
         btnOverview.setOnAction(_ -> showOverview());
         btnHistory.setOnAction(_ -> showMyHistory());
         btnSettings.setOnAction(_ -> new Settings(contentArea, currentUser).showSettings());
@@ -63,16 +61,14 @@ public class CustomerDashboardWindow {
 
         sidebar.getChildren().addAll(lblWelcome, new Separator(), btnOverview, btnHistory, btnSettings, btnLogout);
 
-        // --- MAIN CONTENT AREA ---
         contentArea = new VBox(20);
-        contentArea.setPadding(new Insets(30)); // Matched Staff padding
-        contentArea.setAlignment(Pos.TOP_CENTER); // Matched Staff alignment
-        contentArea.setStyle("-fx-background-color: #ecf0f1;"); // Matched Staff background
+        contentArea.setPadding(new Insets(30));
+        contentArea.setAlignment(Pos.TOP_CENTER);
+        contentArea.setStyle("-fx-background-color: #ecf0f1;");
 
         mainLayout.setLeft(sidebar);
         mainLayout.setCenter(contentArea);
 
-        // Load Default View
         showOverview();
 
         Scene scene = new Scene(mainLayout, 900, 600);
@@ -80,7 +76,6 @@ public class CustomerDashboardWindow {
         this.stage.show();
     }
 
-    // Updated to match Staff's createMenuButton style
     private Button createNavButton(String text) {
         Button b = new Button(text);
         b.setPrefWidth(180);
@@ -88,7 +83,6 @@ public class CustomerDashboardWindow {
         return b;
     }
 
-    // --- VIEW: OVERVIEW / ASSIGNED SPOT ---
     private void showOverview() {
         contentArea.getChildren().clear();
         VBox view = new VBox(20);
@@ -119,7 +113,6 @@ public class CustomerDashboardWindow {
         contentArea.getChildren().add(view);
     }
 
-    // --- VIEW: TRANSACTION HISTORY ---
     private void showMyHistory() {
         contentArea.getChildren().clear();
         Label title = new Label("My Transaction History: ");
@@ -157,7 +150,6 @@ public class CustomerDashboardWindow {
             new AlertUser().showAlert(Alert.AlertType.ERROR, "Database Error", "Unable to load history.");
         }
 
-        // Since contentArea is now a VBox, these will stack vertically
         contentArea.getChildren().addAll(title, table);
     }
 }

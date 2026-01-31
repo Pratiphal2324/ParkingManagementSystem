@@ -36,7 +36,6 @@ public class ManagerDashboardWindow {
     public void show(Stage stage) {
         root = new BorderPane();
 
-        // --- SIDEBAR (Same Style as Staff) ---
         VBox sidebar = new VBox(12);
         sidebar.setPadding(new Insets(20));
         sidebar.setStyle("-fx-background-color: #2c3e50;");
@@ -46,7 +45,6 @@ public class ManagerDashboardWindow {
         lblWelcome.setTextFill(Color.WHITE);
         lblWelcome.setFont(Font.font("Verdana", FontWeight.BOLD, 16));
 
-        // Group 1: Personnel Management
         Label lblStaff = new Label("PERSONNEL");
         lblStaff.setTextFill(Color.web("#95a5a6"));
         lblStaff.setFont(Font.font("Arial", FontWeight.BOLD, 10));
@@ -75,7 +73,6 @@ public class ManagerDashboardWindow {
             fillTableCustomer(c);
         });
 
-        // Group 2: System Management
         Label lblHome = new Label("WELCOME SCREEN");
         lblHome.setTextFill(Color.web("#95a5a6"));
         lblHome.setFont(Font.font("Arial", FontWeight.BOLD, 10));
@@ -97,7 +94,6 @@ public class ManagerDashboardWindow {
         lblPersonalConfig.setTextFill(Color.web("#95a5a6"));
         lblPersonalConfig.setFont(Font.font("Arial", FontWeight.BOLD, 10));
 
-        // Group 3: Account
         Separator sep = new Separator();
         Button btnSettings = createMenuButton("Settings");
         Button btnLogout = createMenuButton("Logout");
@@ -115,7 +111,6 @@ public class ManagerDashboardWindow {
                 sep,lblPersonalConfig, btnSettings,new Separator(),lblExit, btnLogout
         );
 
-        // --- CONTENT AREA ---
         contentArea = new VBox(20);
         contentArea.setPadding(new Insets(30));
         contentArea.setAlignment(Pos.TOP_CENTER);
@@ -133,10 +128,9 @@ public class ManagerDashboardWindow {
         root.setLeft(sidebar);
         root.setCenter(contentArea);
 
-        // Default view
         showWelcomeSummary();
 
-        Scene scene = new Scene(root, 1100, 700); // Slightly wider for manager data
+        Scene scene = new Scene(root, 1100, 700);
         stage.setTitle("Admin Control Panel");
         stage.setScene(scene);
         stage.show();
@@ -365,7 +359,6 @@ public class ManagerDashboardWindow {
                 return;
             }
 
-            // RETRIEVE STAFF DATA HERE
             u = new StaffDAO().getStaffByUserId(Integer.parseInt(inputId));
 
             if (u == null) {
@@ -373,7 +366,6 @@ public class ManagerDashboardWindow {
                 return;
             }
 
-            // If found, rebuild the contentArea with the Profile Card
             contentArea.getChildren().clear();
             contentArea.setSpacing(30);
             contentArea.setAlignment(Pos.TOP_CENTER);
@@ -392,9 +384,9 @@ public class ManagerDashboardWindow {
             profileCard.getChildren().addAll(
                     createRecordRow("Username", u.getUsername(), "username"),
                     new Separator(),
-                    createRecordRow("Phone", u.getPhone(), "phone"), // Fixed: Was showing phone for Salary label
+                    createRecordRow("Phone", u.getPhone(), "phone"),
                     new Separator(),
-                    createRecordRow("Salary", String.valueOf(u.getSalary()), "salary"), // Added salary logic
+                    createRecordRow("Salary", String.valueOf(u.getSalary()), "salary"),
                     new Separator(),
                     createRecordRow("Shift Time", String.valueOf(u.getShiftTime()), "shiftTime"),
                     new Separator(),
@@ -418,7 +410,6 @@ public class ManagerDashboardWindow {
         title.setFont(Font.font("Verdana", FontWeight.BOLD, 22));
         title.setTextFill(Color.web("#2c3e50"));
 
-        // Container for the table (The Card)
         VBox tableCard = new VBox(15);
         tableCard.setPadding(new Insets(20));
         tableCard.setStyle("-fx-background-color: white; -fx-background-radius: 10; " +
@@ -426,7 +417,6 @@ public class ManagerDashboardWindow {
 
         TableView<Pricing> pricingTable = createPricingTable();
 
-        // Fetch all 4 records from DB
         ObservableList<Pricing> data = FXCollections.observableArrayList(
                 new PricingDAO().getPricingByTypeCategory("Fuel", "TwoWheeler"),
                 new PricingDAO().getPricingByTypeCategory("Electric", "TwoWheeler"),
@@ -441,16 +431,13 @@ public class ManagerDashboardWindow {
     }
 
     private void handlePriceEdit(Pricing p) {
-        // 1. Create the custom dialog
         Dialog<ButtonType> dialog = new Dialog<>();
         dialog.setTitle("Update Pricing");
         dialog.setHeaderText("Updating Rates for: " + p.getVehicleType() + " (" + p.getVehicleCategory() + ")");
 
-        // 2. Set the button types (Confirmation and Cancel)
         ButtonType updateButtonType = new ButtonType("Update", ButtonBar.ButtonData.OK_DONE);
         dialog.getDialogPane().getButtonTypes().addAll(updateButtonType, ButtonType.CANCEL);
 
-        // 3. Create the layout and fields
         GridPane grid = new GridPane();
         grid.setHgap(10);
         grid.setVgap(10);
@@ -469,19 +456,17 @@ public class ManagerDashboardWindow {
 
         dialog.getDialogPane().setContent(grid);
 
-        // 4. Handle the result
         dialog.showAndWait().ifPresent(response -> {
             if (response == updateButtonType) {
                 try {
                     double newHourly = Double.parseDouble(hourlyRateField.getText());
                     double newMin = Double.parseDouble(minPriceField.getText());
 
-                    // Call your DAO to update both values
                     boolean success = new PricingDAO().updatePricing(p.getVehicleCategory(), p.getVehicleType(),newHourly,newMin);
 
                     if (success) {
                         new AlertUser().showAlert(Alert.AlertType.INFORMATION, "Success", "Pricing updated successfully!");
-                        showUpdatePricing(); // Refresh the table to show new values
+                        showUpdatePricing();
                     }
                 } catch (NumberFormatException e) {
                     new AlertUser().showAlert(Alert.AlertType.ERROR, "Input Error", "Please enter valid numeric values.");
@@ -507,11 +492,9 @@ public class ManagerDashboardWindow {
         TableColumn<Pricing, Double> colMin = new TableColumn<>("Min Price ($)");
         colMin.setCellValueFactory(new PropertyValueFactory<>("minPrice"));
 
-        // Add an Action Column for the Edit Button
         TableColumn<Pricing, Void> colAction = new TableColumn<>("Action");
         colAction.setCellFactory(_ -> new TableCell<>() {
             private final Button btn = new Button("Edit");
-
             {
                 btn.setStyle("-fx-background-color: #3498db; -fx-text-fill: white; -fx-cursor: hand;");
                 btn.setOnAction(_ -> {
@@ -519,7 +502,6 @@ public class ManagerDashboardWindow {
                     handlePriceEdit(p);
                 });
             }
-
             @Override
             protected void updateItem(Void item, boolean empty) {
                 super.updateItem(item, empty);
@@ -651,14 +633,14 @@ public class ManagerDashboardWindow {
     }
 
     private void handleStaffSignUp(String uname, String pass, String ph, String job, String s, LocalDate hd, String shift) {
-        int count = new CustomerDAO().getCustomerCountWithUsername(uname);
+        int count = new StaffDAO().getStaffCountWithUsername(uname);
         if (count > 0) {
             new AlertUser().showAlert(Alert.AlertType.ERROR, "Username Error", "Username already taken!");
         } else {
             LocalTime startTime = switch (shift) {
-                case "Morning" -> LocalTime.of(6, 0); // 06:00 AM
-                case "Evening" -> LocalTime.of(14, 0); // 02:00 PM
-                case "Night" -> LocalTime.of(22, 0); // 10:00 PM
+                case "Morning" -> LocalTime.of(6, 0);
+                case "Evening" -> LocalTime.of(14, 0);
+                case "Night" -> LocalTime.of(22, 0);
                 default -> LocalTime.of(9, 0);
             };
             if (!uname.isEmpty() && !pass.isEmpty()) {
@@ -705,7 +687,6 @@ public class ManagerDashboardWindow {
 
         TableView<Floor> pricingTable = createFloorTable();
 
-        // Fetch all 4 records from DB
         ObservableList<Floor> data = FXCollections.observableArrayList(
                 new FloorDAO().getFloorByFloorNumber(1),
                 new FloorDAO().getFloorByFloorNumber(2),
@@ -736,7 +717,6 @@ public class ManagerDashboardWindow {
         TableColumn<Floor, Double> colMin = new TableColumn<>("Total no. of spaces");
         colMin.setCellValueFactory(new PropertyValueFactory<>("TotalNoOfSpaces"));
 
-        // Add an Action Column for the Edit Button
         TableColumn<Floor, Void> colAction = new TableColumn<>("Action");
         colAction.setCellFactory(_ -> new TableCell<>() {
             private final Button btn = new Button("Edit");
@@ -768,7 +748,6 @@ public class ManagerDashboardWindow {
         ButtonType updateButtonType = new ButtonType("Update", ButtonBar.ButtonData.OK_DONE);
         dialog.getDialogPane().getButtonTypes().addAll(updateButtonType, ButtonType.CANCEL);
 
-        // 3. Create the layout and fields
         GridPane grid = new GridPane();
         grid.setHgap(10);
         grid.setVgap(10);
@@ -787,19 +766,17 @@ public class ManagerDashboardWindow {
 
         dialog.getDialogPane().setContent(grid);
 
-        // 4. Handle the result
         dialog.showAndWait().ifPresent(response -> {
             if (response == updateButtonType) {
                 try {
                     int newElectric = Integer.parseInt(electricSpacesField.getText());
                     int newFuel = Integer.parseInt(fuelSpacesField.getText());
 
-                    // Call your DAO to update both values
                     boolean success = new FloorDAO().updateFloor(f.getFloorNumber(),newElectric,newFuel);
 
                     if (success) {
                         new AlertUser().showAlert(Alert.AlertType.INFORMATION, "Success", "Floor updated successfully!");
-                        showUpdateFloor(); // Refresh the table to show new values
+                        showUpdateFloor();
                     }
                 } catch (NumberFormatException e) {
                     new AlertUser().showAlert(Alert.AlertType.ERROR, "Input Error", "Please enter valid numeric values.");

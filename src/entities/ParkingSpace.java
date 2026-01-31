@@ -16,7 +16,6 @@ public class ParkingSpace {
 
         validateType(type);
         validateCategory(category);
-
         this.rowNumber = rowNumber;
         this.columnNumber = columnNumber;
         this.floorNumber = floorNumber;

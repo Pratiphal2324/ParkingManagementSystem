@@ -69,7 +69,7 @@ public class StaffDashboardWindow {
         contentArea.setAlignment(Pos.TOP_CENTER);
         contentArea.setStyle("-fx-background-color: #ecf0f1;");
 
-        btnCheckIn.setOnAction(_ -> showCheckInView()); // Link to new method
+        btnCheckIn.setOnAction(_ -> showCheckInView());
         btnCheckOut.setOnAction(_ -> showCheckOutView());
         btnHistoryUser.setOnAction(_ -> showHistoryView("Search by User ID", "Enter ID..."));
         btnHistoryPlate.setOnAction(_ -> showHistoryView("Search by Plate", "Enter Plate..."));
@@ -136,8 +136,10 @@ public class StaffDashboardWindow {
                                 Integer.parseInt(driverIdField.getText())
                         );
                         int id = new TransactionDAO().saveNewTransaction(t);
-                        new ParkingSpaceDAO().updateOccupiedTo1(r,c,f);
-                        t.setTransactionID(id);
+                        if(id!=0) {
+                            new ParkingSpaceDAO().updateOccupiedTo1(r, c, f);
+                            t.setTransactionID(id);
+                        }
                     }
                 } else {
                     new AlertUser().showAlert(Alert.AlertType.WARNING,"Error!", "Vehicle is not checked out yet!");
@@ -199,9 +201,11 @@ public class StaffDashboardWindow {
                                     d
                             );
                             t.processCheckout();
-                            new TransactionDAO().updateCheckOut(t);
-                            new ParkingSpaceDAO().updateOccupiedTo0(r,c,f);
-                            receiptArea.setText("Vehicle Number Plate: "+plate+"\n"+t.displayBill());
+                            boolean checkOutSuccess = new TransactionDAO().updateCheckOut(t);
+                            if(checkOutSuccess) {
+                                new ParkingSpaceDAO().updateOccupiedTo0(r, c, f);
+                                receiptArea.setText("Vehicle Number Plate: " + plate + "\n" + t.displayBill());
+                            }
                         }
                     }else{
                         new AlertUser().showAlert(Alert.AlertType.WARNING,"Error!", "Vehicle is already checked out!");

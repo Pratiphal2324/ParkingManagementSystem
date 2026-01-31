@@ -44,7 +44,7 @@ public class LoginView {
             backgroundRegion.setBackground(new Background(bImg));
 
             Region overlay = new Region();
-            overlay.setStyle("-fx-background-color: rgba(0, 0, 0, 0.4);"); // 40% black tint
+            overlay.setStyle("-fx-background-color: rgba(0, 0, 0, 0.4);");
 
             root.getChildren().addAll(backgroundRegion, overlay);
         } catch (Exception e) {
@@ -202,7 +202,7 @@ public class LoginView {
         rbElectric.setToggleGroup(categoryGroup);
         RadioButton rbFuel = new RadioButton("FourWheeler");
         rbFuel.setToggleGroup(categoryGroup);
-        rbFuel.setSelected(true); // Default
+        rbFuel.setSelected(true);
         HBox catOptions = new HBox(15, rbElectric, rbFuel);
         catBox.getChildren().addAll(lblCategory, catOptions);
 
@@ -213,7 +213,7 @@ public class LoginView {
         rbTwo.setToggleGroup(typeGroup);
         RadioButton rbFour = new RadioButton("Fuel");
         rbFour.setToggleGroup(typeGroup);
-        rbFour.setSelected(true); // Default
+        rbFour.setSelected(true);
         HBox typeOptions = new HBox(15, rbTwo, rbFour);
         typeBox.getChildren().addAll(lblType, typeOptions);
 

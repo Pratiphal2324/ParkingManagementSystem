@@ -50,7 +50,7 @@ public class CustomerDAO {
         return null;
     }
     public int getCustomerCountWithUsername(String uname){
-        String sql = "select COUNT(*) as count FROM view_user where username = ?";
+        String sql = "select COUNT(*) as count FROM user INNER JOIN customer ON user.userID = customer.userID where username = ?";
         try(Connection conn = DatabaseConnection.getConnection();
             PreparedStatement pstmt = conn.prepareStatement(sql)){
             pstmt.setString(1,uname);
