@@ -80,7 +80,7 @@ public class ParkingSpaceDAO {
             pstmt.setInt(3,floorNumber);
             int rows = pstmt.executeUpdate();
             if(rows == 1){
-                System.out.println("parkingSpace successfully occupied");
+                System.out.println("parkingSpace successfully freed");
             }
         }catch(SQLException e){
             System.out.println(e.getMessage());

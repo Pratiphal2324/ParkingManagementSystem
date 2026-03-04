@@ -142,8 +142,8 @@ public class CustomerDashboardWindow {
         col7.setCellValueFactory(new PropertyValueFactory<>("ParkingRow"));
         col8.setCellValueFactory(new PropertyValueFactory<>("ParkingColumn"));
         col9.setCellValueFactory(new PropertyValueFactory<>("TotalFee"));
-        col10.setCellValueFactory(new PropertyValueFactory<>("checkInStaffID"));
-        col11.setCellValueFactory(new PropertyValueFactory<>("checkOutStaffID"));
+        col10.setCellValueFactory(new PropertyValueFactory<>("CheckInStaffID"));
+        col11.setCellValueFactory(new PropertyValueFactory<>("CheckOutStaffID"));
 
         try {
             ObservableList<Transaction> data = FXCollections.observableArrayList();

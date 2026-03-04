@@ -12,27 +12,42 @@ import java.util.ArrayList;
 
 public class VehicleDAO {
     public Vehicle registerVehicle(String numberPlate, String Category, String Type, int userID){
-        String sql = "INSERT INTO vehicle (numberPlate,Category,Type,DriverID) VALUES (?,?,?,?)";
-        try(Connection conn = DatabaseConnection.getConnection();
-            PreparedStatement pstmt = conn.prepareStatement(sql)){
-            pstmt.setString(1,numberPlate);
-            pstmt.setString(2,Category);
-            pstmt.setString(3,Type);
-            pstmt.setInt(4,userID);
-            int rows = pstmt.executeUpdate();
-            if(rows>0){
-                return new Vehicle(numberPlate, Category, Type, userID);
+        Vehicle v = getVehicleByNumberPlate(numberPlate);
+        String sql;
+        PreparedStatement pstmt;
+
+        Connection conn = DatabaseConnection.getConnection();
+        try{
+            if(v!=null){
+                sql = "INSERT INTO driver_vehicle (numberPlate, userID, isPrimaryDriver) VALUES (?,?,0)";
+                pstmt = conn.prepareStatement(sql);
+                pstmt.setString(1,numberPlate);
+                pstmt.setInt(2,userID);
             }
-            else{
-                return null;
+            else {
+                sql = "INSERT INTO vehicle (numberPlate,Category,Type) VALUES (?,?,?);"+
+                        "INSERT INTO driver_vehicle(numberPlate, userID) VALUES (?,?);";
+                pstmt = conn.prepareStatement(sql);
+                pstmt.setString(1,numberPlate);
+                pstmt.setString(2,Category);
+                pstmt.setString(3,Type);
+                pstmt.setString(4,numberPlate);
+                pstmt.setInt(5,userID);
             }
+                int rows = pstmt.executeUpdate();
+                if(rows>0){
+                    return new Vehicle(numberPlate, Category, Type, userID);
+                }
+                else{
+                    return null;
+                }
         }catch(SQLException e){
             System.out.println(e.getMessage());
         }
         return null;
     }
     public Vehicle getVehicleByNumberPlate(String numberPlate){
-        String sql = "SELECT * FROM view_vehicle WHERE numberPlate = ?";
+        String sql = "SELECT * FROM vehicle INNER JOIN driver_vehicle WHERE vehicle.numberPlate = ?";
         try(Connection conn = DatabaseConnection.getConnection();
             PreparedStatement pstmt = conn.prepareStatement(sql)){
             pstmt.setString(1,numberPlate);
@@ -40,7 +55,7 @@ public class VehicleDAO {
             if(rs.next()){
                 String category = rs.getString("Category");
                 String type = rs.getString("Type");
-                int driverID = rs.getInt("DriverID");
+                int driverID = rs.getInt("userID");
                 try {
                     return new Vehicle(numberPlate, category, type, driverID);
                 }catch(InvalidVehicleCategoryException | InvalidVehicleTypeException e){
@@ -53,7 +68,7 @@ public class VehicleDAO {
         return null;
     }
     public ArrayList<String> getVehiclePlateByUserId(int userID){
-        String sql = "SELECT numberPlate FROM view_vehicle WHERE DriverID = ?";
+        String sql = "SELECT numberPlate FROM driver_vehicle WHERE userID = ?";
         ArrayList<String> list = new ArrayList<>();
         try(Connection conn = DatabaseConnection.getConnection();
             PreparedStatement pstmt = conn.prepareStatement(sql)){
@@ -88,7 +103,7 @@ public class VehicleDAO {
         return false;
     }
     public boolean checkVehicleOwnership(String vehiclePlate, int driverID){
-        String sql = "SELECT * FROM vehicle WHERE numberPlate = ? AND DriverID = ?";
+        String sql = "SELECT * FROM driver_vehicle WHERE numberPlate = ? AND userID = ?";
         try(Connection conn = DatabaseConnection.getConnection();
             PreparedStatement pstmt = conn.prepareStatement(sql)){
             pstmt.setString(1,vehiclePlate);

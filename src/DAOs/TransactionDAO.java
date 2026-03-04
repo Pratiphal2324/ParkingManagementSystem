@@ -129,6 +129,7 @@ public class TransactionDAO {
                 LocalDateTime checkOut = (time==null)?null : time.toLocalDateTime();
                 double totalFee = rs.getDouble("TotalFee");
                 int checkInStaffID = rs.getInt("CheckInStaffID");
+                int checkOutStaffID = rs.getInt("CheckOutStaffID");
                 Transaction t = new Transaction(
                         rs.getInt("TransactionID"),
                         v,
@@ -140,6 +141,7 @@ public class TransactionDAO {
                 );
                 t.setTotalFee(totalFee);
                 t.setCheckOutTime(checkOut);
+                t.setCheckOutStaffID(checkOutStaffID);
                 list.add(t);
             }
         }catch(SQLException e){
