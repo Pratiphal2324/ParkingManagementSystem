@@ -9,7 +9,9 @@ public class Transaction {
     private LocalDateTime checkOutTime;
     private double totalFee;
     public int driverID;
-    public Transaction(int transactionID, Vehicle vehicle, Pricing pricing, ParkingSpace parkingSpace, LocalDateTime checkInTime,int driverID){
+    public int checkInStaffID;
+    public int checkOutStaffID;
+    public Transaction(int transactionID, Vehicle vehicle, Pricing pricing, ParkingSpace parkingSpace, LocalDateTime checkInTime,int driverID, int checkInStaffID){
         this.transactionID = transactionID;
         this.parkingSpace = parkingSpace;
         this.pricing = pricing;
@@ -17,6 +19,7 @@ public class Transaction {
         this.checkInTime = checkInTime;
         this.driverID = driverID;
         this.totalFee = 0;
+        this.checkInStaffID = checkInStaffID;
     }
     public void processCheckout() {
         this.checkOutTime = LocalDateTime.now();
@@ -59,6 +62,22 @@ public class Transaction {
         return checkInTime;
     }
     public int getDriverID() { return driverID; }
+
+    public int getCheckInStaffID() {
+        return checkInStaffID;
+    }
+
+    public int getCheckOutStaffID() {
+        return checkOutStaffID;
+    }
+
+    public void setCheckInStaffID(int checkInStaffID) {
+        this.checkInStaffID = checkInStaffID;
+    }
+
+    public void setCheckOutStaffID(int checkOutStaffID) {
+        this.checkOutStaffID = checkOutStaffID;
+    }
 
     public void setCheckInTime(LocalDateTime checkInTime) {
         this.checkInTime = checkInTime;

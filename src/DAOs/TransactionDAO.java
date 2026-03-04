@@ -33,7 +33,7 @@ public class TransactionDAO {
     return null;
 }
     public int saveNewTransaction(Transaction trans) {
-        String sql = "INSERT INTO transaction (VehiclePlate, parkingRow, parkingColumn, floorNumber, CheckinTime, driverID) VALUES (?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO transaction (VehiclePlate, parkingRow, parkingColumn, floorNumber, CheckinTime, driverID, CheckInStaffID) VALUES (?, ?, ?, ?, ?, ?, ?)";
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -44,6 +44,7 @@ public class TransactionDAO {
             pstmt.setInt(4, trans.parkingSpace.getFloorNumber());
             pstmt.setTimestamp(5, Timestamp.valueOf(trans.getCheckInTime()));
             pstmt.setInt(6, trans.getDriverID());
+            pstmt.setInt(7, trans.getCheckInStaffID());
 
             pstmt.executeUpdate();
 
@@ -62,14 +63,15 @@ public class TransactionDAO {
         return 0;
     }
     public boolean updateCheckOut(Transaction trans) {
-        String sql = "UPDATE transaction SET CheckoutTime = ?, totalFee = ? WHERE TransactionID = ?";
+        String sql = "UPDATE transaction SET CheckoutTime = ?, totalFee = ?, CheckOutStaffID = ? WHERE TransactionID = ?";
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
             pstmt.setTimestamp(1, Timestamp.valueOf(trans.getCheckOutTime()));
             pstmt.setDouble(2, trans.getTotalFee());
-            pstmt.setInt(3, trans.getTransactionID());
+            pstmt.setInt(3, trans.getCheckInStaffID());
+            pstmt.setInt(4, trans.getTransactionID());
 
             int rowsAffected = pstmt.executeUpdate();
             if (rowsAffected > 0) {
@@ -85,7 +87,7 @@ public class TransactionDAO {
         return false;
     }
     public String getTransactionByVehiclePlate(String plate){
-        String sql = "SELECT * FROM view_transaction WHERE VehiclePlate = ? ORDER BY TransactionID DESC LIMIT 1";
+        String sql = "SELECT * FROM transaction WHERE VehiclePlate = ? ORDER BY TransactionID DESC LIMIT 1";
         try(Connection conn = DatabaseConnection.getConnection();
             PreparedStatement pstmt = conn.prepareStatement(sql)){
             pstmt.setString(1,plate);
@@ -97,7 +99,9 @@ public class TransactionDAO {
                 int cNum = rs.getInt("parkingColumn");
                 LocalDateTime checkIn = rs.getTimestamp("CheckinTime").toLocalDateTime();
                 int driverID = rs.getInt("driverID");
-                return tid + "," + fNum+ "," +rNum + "," + cNum + "," + checkIn + "," + driverID;
+                int checkInStaffID = rs.getInt("CheckInStaffID");
+                int checkOutStaffID = rs.getInt("CheckOutStaffID");
+                return tid + "," + fNum+ "," +rNum + "," + cNum + "," + checkIn + "," + driverID + "," + checkInStaffID + "," + checkOutStaffID;
             }else{
                 new AlertUser().showAlert(Alert.AlertType.WARNING, "Error!", "No parking space available!");
                 return null;
@@ -108,7 +112,7 @@ public class TransactionDAO {
         return null;
     }
     public List<Transaction> getHistoryByUserId(int id){
-        String sql = "select * from view_transaction WHERE driverID = ?";
+        String sql = "select * from transaction WHERE driverID = ?";
         List<Transaction> list = new ArrayList<>();
         try(Connection conn = DatabaseConnection.getConnection();
             PreparedStatement pstmt = conn.prepareStatement(sql)){
@@ -124,13 +128,15 @@ public class TransactionDAO {
                 Timestamp time = rs.getTimestamp("CheckoutTime");
                 LocalDateTime checkOut = (time==null)?null : time.toLocalDateTime();
                 double totalFee = rs.getDouble("TotalFee");
+                int checkInStaffID = rs.getInt("CheckInStaffID");
                 Transaction t = new Transaction(
                         rs.getInt("TransactionID"),
                         v,
                         p,
                         new ParkingSpaceDAO().getParkingSpaceByRowColFloor(r,c,f),
                         checkIn,
-                        rs.getInt("driverID")
+                        rs.getInt("driverID"),
+                        checkInStaffID
                 );
                 t.setTotalFee(totalFee);
                 t.setCheckOutTime(checkOut);
@@ -142,7 +148,7 @@ public class TransactionDAO {
         return list;
     }
     public double getTotalRevenue(){
-        String sql = "SELECT SUM(TotalFee) as sum FROM view_transaction";
+        String sql = "SELECT SUM(TotalFee) as sum FROM transaction";
         double revenue = 0;
         try(Connection conn = DatabaseConnection.getConnection();
             PreparedStatement pstmt = conn.prepareStatement(sql)){
@@ -158,7 +164,7 @@ public class TransactionDAO {
         return revenue;
     }
     public List<Transaction> getHistoryByVehiclePlate(String plate){
-        String sql = "select * from view_transaction WHERE VehiclePlate = ?";
+        String sql = "select * from transaction WHERE VehiclePlate = ?";
         List<Transaction> list = new ArrayList<>();
         try(Connection conn = DatabaseConnection.getConnection();
             PreparedStatement pstmt = conn.prepareStatement(sql)){
@@ -180,10 +186,12 @@ public class TransactionDAO {
                         p,
                         new ParkingSpaceDAO().getParkingSpaceByRowColFloor(r,c,f),
                         checkIn,
-                        rs.getInt("driverID")
+                        rs.getInt("driverID"),
+                        rs.getInt("CheckInStaffID")
                 );
                 t.setTotalFee(totalFee);
                 t.setCheckOutTime(checkOut);
+                t.setCheckOutStaffID(rs.getInt("CheckOutStaffID"));
                 list.add(t);
             }
         }catch(SQLException e){

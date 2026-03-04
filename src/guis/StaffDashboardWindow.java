@@ -133,7 +133,8 @@ public class StaffDashboardWindow {
                                 new PricingDAO().getPricingByTypeCategory(v.getCategory(), v.getType()),
                                 new ParkingSpaceDAO().getParkingSpaceByRowColFloor(r, c, f),
                                 LocalDateTime.now(),
-                                Integer.parseInt(driverIdField.getText())
+                                Integer.parseInt(driverIdField.getText()),
+                                currentUser.getUserID()
                         );
                         int id = new TransactionDAO().saveNewTransaction(t);
                         if(id!=0) {
@@ -176,7 +177,7 @@ public class StaffDashboardWindow {
         btnCalculate.setOnAction(_ -> {
             String plate = plateField.getText();
             Vehicle v = new VehicleDAO().getVehicleByNumberPlate(plate);
-            int id,f,r,c,d;
+            int id,f,r,c,d,cis,cos;
             String checkIn;
             if (v != null) {
                     boolean b = new VehicleDAO().checkIfCheckedOut(v);
@@ -190,6 +191,8 @@ public class StaffDashboardWindow {
                             c = Integer.parseInt(info[3]);
                             checkIn = info[4];
                             d = Integer.parseInt(info[5]);
+                            cis = Integer.parseInt(info[6]);
+                            cos = Integer.parseInt(info[7]);
                             statusLabel.setText("Check-out successful for " + plate + "at " +"Floor :"+ f + ", Row: " + r + ", Column: "+c);
                             statusLabel.setTextFill(Color.GREEN);
                             Transaction t = new Transaction(
@@ -198,9 +201,11 @@ public class StaffDashboardWindow {
                                     new PricingDAO().getPricingByTypeCategory(v.getType(), v.getCategory()),
                                     new ParkingSpaceDAO().getParkingSpaceByRowColFloor(r,c,f),
                                     LocalDateTime.parse(checkIn),
-                                    d
+                                    d,
+                                    cis
                             );
                             t.processCheckout();
+                            t.setCheckOutStaffID(currentUser.getUserID());
                             boolean checkOutSuccess = new TransactionDAO().updateCheckOut(t);
                             if(checkOutSuccess) {
                                 new ParkingSpaceDAO().updateOccupiedTo0(r, c, f);
@@ -241,8 +246,10 @@ public class StaffDashboardWindow {
         TableColumn<Transaction, Integer> col7 = new TableColumn<>("Row");
         TableColumn<Transaction, Integer> col8 = new TableColumn<>("Column");
         TableColumn<Transaction, Double> col9 = new TableColumn<>("TotalFee");
+        TableColumn<Transaction, Integer> col10 = new TableColumn<>("CheckInStaffID");
+        TableColumn<Transaction, Integer> col11 = new TableColumn<>("CheckOutStaffID");
 
-        table.getColumns().addAll(col1, col2, col3, col4, col5, col6, col7, col8, col9);
+        table.getColumns().addAll(col1, col2, col3, col4, col5, col6, col7, col8, col9, col10, col11);
 
         col1.setCellValueFactory(new PropertyValueFactory<>("TransactionID"));
         col2.setCellValueFactory(new PropertyValueFactory<>("driverID"));
@@ -253,6 +260,8 @@ public class StaffDashboardWindow {
         col7.setCellValueFactory(new PropertyValueFactory<>("ParkingRow"));
         col8.setCellValueFactory(new PropertyValueFactory<>("ParkingColumn"));
         col9.setCellValueFactory(new PropertyValueFactory<>("TotalFee"));
+        col10.setCellValueFactory(new PropertyValueFactory<>("checkInStaffID"));
+        col11.setCellValueFactory(new PropertyValueFactory<>("checkOutStaffID"));
         table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
 
         searchBtn.setOnAction(_ -> {

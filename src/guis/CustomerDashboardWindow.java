@@ -128,8 +128,10 @@ public class CustomerDashboardWindow {
         TableColumn<Transaction, Integer> col7 = new TableColumn<>("Row");
         TableColumn<Transaction, Integer> col8 = new TableColumn<>("Column");
         TableColumn<Transaction, Double> col9 = new TableColumn<>("TotalFee");
+        TableColumn<Transaction, Integer> col10 = new TableColumn<>("CheckInStaffID");
+        TableColumn<Transaction, Integer> col11 = new TableColumn<>("CheckOutStaffID");
 
-        table.getColumns().addAll(col1, col2, col3, col4, col5, col6, col7, col8, col9);
+        table.getColumns().addAll(col1, col2, col3, col4, col5, col6, col7, col8, col9,  col10, col11);
 
         col1.setCellValueFactory(new PropertyValueFactory<>("TransactionID"));
         col2.setCellValueFactory(new PropertyValueFactory<>("driverID"));
@@ -140,6 +142,8 @@ public class CustomerDashboardWindow {
         col7.setCellValueFactory(new PropertyValueFactory<>("ParkingRow"));
         col8.setCellValueFactory(new PropertyValueFactory<>("ParkingColumn"));
         col9.setCellValueFactory(new PropertyValueFactory<>("TotalFee"));
+        col10.setCellValueFactory(new PropertyValueFactory<>("checkInStaffID"));
+        col11.setCellValueFactory(new PropertyValueFactory<>("checkOutStaffID"));
 
         try {
             ObservableList<Transaction> data = FXCollections.observableArrayList();
